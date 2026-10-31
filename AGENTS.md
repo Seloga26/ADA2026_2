@@ -165,7 +165,7 @@ ADA2026_2/
     algoritmos/           fuerza_bruta, backtracking, coordenadas, reparto_uniforme, ucb1
     experimentos/         medir.py, graficar.py
   entrega.json
-  notebooks/              busqueda.ipynb, evaluacion.ipynb
+  notebooks/              medicion_velocidad.ipynb, busqueda.ipynb, evaluacion.ipynb
   tests/
   resultados/
   informe/
@@ -191,6 +191,7 @@ su interior y lanza `PresupuestoAgotado`.
 ## 8. Estado actual del repositorio
 
 - Fase: primera entrega. Los archivos del repositorio base están en la raíz, sin cambios, desde el commit `4d8358d` de la base.
+- Listos: contratos, `OraculoContado`, modelo sintético, fuerza bruta, validación de `entrega.json`, reducción y notebooks de medición y evaluación. Falta probar los notebooks en Colab.
 - Primera tarea técnica: medir la velocidad real en Colab, porque define D8 y el
   número de arranques.
 
