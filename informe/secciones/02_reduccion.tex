@@ -2,5 +2,101 @@
 \section{Reducción desde 3-SAT y análisis de muestreo}
 \label{sec:reduccion}
 
-% Parte 1: versión de decisión, construcción, polinomialidad y ambas direcciones.
-% Parte 2: complejidad de muestreo, sin trasladar la demostración.
+Esta sección separa las dos partes del problema. La primera supone un oráculo exacto
+y justifica su NP-dureza. La segunda considera consultas ruidosas o limitadas y se
+analiza por complejidad de muestreo: no hereda la demostración de la primera.
+
+\subsection{Parte 1: configuración óptima con oráculo exacto}
+
+La dureza se estudia sobre el problema general, donde el número de categorías $L$ y
+las opciones $k_1,\dots,k_L$ forman parte de la entrada. Con $L=5$ fijo, $|\conf|$ sería
+constante y bastaría recorrer todas las configuraciones. Por eso el caso del proyecto,
+con $L=5$ y $k_i=8$, es una instancia finita del problema general y no hereda por sí
+sola la dureza.
+
+\begin{definicion}[CONFIG-EXACTA]
+Se da un catálogo de $L$ categorías con $k_i$ opciones, un conjunto de reglas, las
+reglas que satisface cada opción, $n$ instancias, cada una con las reglas que exige, y
+un umbral $t\in[0,1]$. Una configuración $c$ elige una opción por categoría y cumple una
+instancia si la unión de las reglas de sus opciones contiene todas las reglas exigidas.
+Con $\Acc(c)$ la fracción de instancias cumplidas, se pregunta si existe $c$ con
+$\Acc(c)\ge t$.
+\end{definicion}
+
+El oráculo exacto calcula $\Acc(c)$ en tiempo polinomial en el tamaño del catálogo y de
+las instancias. La entrada es el catálogo y no la lista de configuraciones, que tiene
+$\prod_i k_i$ elementos.
+
+\begin{teorema}
+CONFIG-EXACTA es NP-completo, y maximizar $\Acc(c)$ es NP-difícil.
+\end{teorema}
+
+\begin{proof}
+\emph{Pertenencia a NP.} El certificado es una configuración $c$, de tamaño polinomial.
+Calcular $\Acc(c)$ y compararla con $t$ toma tiempo polinomial.
+
+\emph{Construcción.} Sea $\varphi$ una fórmula 3-SAT, problema NP-completo~\cite{karp1972},
+con variables $x_1,\dots,x_m$ y cláusulas $D_1,\dots,D_q$. Se construye:
+\begin{enumerate}
+  \item $L=m$ categorías, una por variable, con dos opciones: \emph{falso} y \emph{verdadero}.
+  \item Una regla $r_j$ por cláusula.
+  \item La opción \emph{verdadero} de $x_i$ satisface $r_j$ si $x_i$ aparece en $D_j$; la
+  opción \emph{falso} la satisface si $\lnot x_i$ aparece en $D_j$.
+  \item $n=q$ instancias, donde la instancia $j$ exige solo $r_j$.
+  \item El umbral $t=1$.
+\end{enumerate}
+El catálogo tiene $2m$ opciones y hay $q$ reglas e instancias, por lo que la construcción
+toma tiempo $O(m+q)$. Aunque $|\conf|=2^m$, las configuraciones no se escriben en la entrada.
+
+Las configuraciones corresponden una a una con las asignaciones de verdad. Para una
+configuración $c$ y su asignación $\alpha$, la instancia $j$ se cumple si y solo si alguna
+opción elegida satisface $r_j$, es decir, si y solo si $\alpha$ hace verdadero un literal
+de $D_j$.
+
+\emph{($\Rightarrow$)} Si $\alpha$ satisface $\varphi$, cada cláusula tiene un literal
+verdadero. Entonces $c$ cumple todas las instancias y $\Acc(c)=1\ge t$.
+
+\emph{($\Leftarrow$)} Si existe $c$ con $\Acc(c)\ge 1$, cumple las $q$ instancias. Por la
+equivalencia anterior, su asignación hace verdadera cada cláusula y satisface $\varphi$.
+
+Por lo tanto, $\varphi$ es satisfacible si y solo si la instancia construida tiene
+respuesta afirmativa, y CONFIG-EXACTA es NP-completo. Un algoritmo polinomial para la
+optimización decidiría el problema comparando el máximo con $t$, así que maximizar
+$\Acc(c)$ es NP-difícil.
+\end{proof}
+
+\paragraph{Ejemplo.} Para $(x_1\lor x_2\lor\lnot x_3)\land(\lnot x_1\lor\lnot x_2\lor x_3)$,
+la asignación $x_1=$ verdadero, $x_2=$ falso, $x_3=$ falso satisface ambas cláusulas. La
+configuración que elige esas opciones cumple las dos instancias y tiene $\Acc(c)=1$.
+
+\subsection{Parte 2: consultas ruidosas o limitadas}
+
+En la práctica el oráculo es un modelo de lenguaje, cada consulta es una generación en
+GPU y el puntaje se mide sobre instancias finitas. Ya no se pregunta solo qué configuración
+es óptima, sino cuántas consultas hacen falta para distinguirla. La demostración anterior
+no se traslada a este caso.
+
+Supóngase que las consultas de una configuración $c$ son variables de Bernoulli
+independientes con media $\Acc(c)$, y sea $\widehat{\Acc}_m(c)$ la media de $m$ consultas.
+La desigualdad de Hoeffding~\cite{hoeffding1963} da
+\[
+  \Pr\bigl[\,|\widehat{\Acc}_m(c)-\Acc(c)|\ge\varepsilon\,\bigr]\le 2e^{-2m\varepsilon^2}.
+\]
+Con la cota de la unión sobre $\conf$, todas las estimaciones tienen error menor que
+$\varepsilon$ con probabilidad al menos $1-\delta$ si
+\[
+  m\ge\frac{\ln(2|\conf|/\delta)}{2\varepsilon^2}.
+\]
+Separar dos configuraciones con diferencia $\Delta$ exige una cantidad de consultas del
+orden de $\ln(1/\delta)/\Delta^2$.
+
+\paragraph{Aplicación.} Con $|\conf|=32\,768$, $\varepsilon=0{,}05$ y $\delta=0{,}05$ se
+obtiene $m\ge 2\,818$ consultas por configuración, unos $92{,}3$ millones en total. Esto
+supera las $100$ instancias de búsqueda y muestra que una garantía uniforme sobre todo el
+espacio es inviable: la búsqueda debe concentrar el presupuesto.
+
+Dos límites completan el análisis. Sobre el lote fijo de $100$ instancias, con temperatura
+$0$, medir todas da la precisión exacta en ese lote, con resolución de un punto porcentual, pero no
+garantiza nada fuera de él. Por otro lado, para una configuración fijada antes de mirar los
+datos, $87$ instancias de validación dan un error de hasta $0{,}146$ con $\delta=0{,}05$.
+Por eso la validación se usa una sola vez y su resultado se reporta como estimación.
