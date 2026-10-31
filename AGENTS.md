@@ -191,20 +191,71 @@ su interior y lanza `PresupuestoAgotado`.
 
 ## 8. Estado actual del repositorio
 
-- Fase: primera entrega. Los archivos del repositorio base están en la raíz, sin cambios, desde el commit `4d8358d` de la base.
-- Listos: contratos, `OraculoContado`, modelo sintético, fuerza bruta, validación de `entrega.json`, reducción y notebooks de medición y evaluación. Falta probar los notebooks en Colab.
-- Velocidad medida en Colab: 1,99 s por generación, 5,77 GB de VRAM (`resultados/velocidad.json`). Define D8 y el
-  número de arranques.
+Última actualización: sábado 2026-10-31, 17:00. Antes de seguir, ejecuta `git fetch origin`,
+`git log origin/main --oneline -5` y `git branch -r`: Dylber pudo haber subido trabajo.
+
+**Entrega:** lunes 2026-11-02 a medianoche (se asume 23:59). Corte de trabajo nuevo: lunes 20:00.
+Qué hace cada uno y qué bloquea a quién: `docs/reparto_primera_entrega.md`.
+
+### Hecho y verificado
+
+| Tarea | Estado | Evidencia |
+|---|---|---|
+| Archivos base | Listo | Idénticos a `4d8358d` |
+| S2 a S4: contratos, `OraculoContado`, sintético, fuerza bruta | Listo | 60 pruebas pasan con `uv run pytest` |
+| S5: velocidad en Colab | Listo | `resultados/velocidad.json`: 1,99 s por generación, 5,77 GB |
+| S7 y S8: reducción y muestreo | Redactado | `informe/secciones/02_reduccion.tex`; compila |
+| S9: notebook de evaluación | Sin probar en Colab | Solo probado con modelo y oráculo simulados |
+| S12: README | Listo | El ejemplo da el resultado esperado |
+
+### Pendiente de Sebastián
+
+1. Rehacer la reducción en papel, sin mirar; se defiende sin notas.
+2. Verificar en la fuente las citas de `informe/referencias.bib` (Karp, Hoeffding, Auer).
+3. S10: probar `notebooks/evaluacion.ipynb` en Colab.
+   - `entrega.json` aún no existe: usar una celda temporal, sin guardarla en el repositorio,
+     que escriba este archivo de prueba antes de `cargar_entrega`:
+     `{"grupo": "G00", "semana": 1, "config": {"rol": 2, "estrategia": 1, "formato": 4, "estilo": 1, "cierre": 7, "temperatura": 0.0}}`
+   - Subir a Colab una copia recortada de `datos_visibles.json` llamada `datos_privados.json`.
+4. S6: revisar el PR de coordenadas en menos de 2 horas.
+5. Lunes: S11 conectar el `entrega.json` definitivo, S13 integrar `informe/main.tex` antes de
+   las 16:00 y S14 probar desde un clon limpio.
+
+### Pendiente de Dylber
+
+Al cierre de esta actualización no había subido nada y faltaba confirmar su acceso al repositorio.
+
+1. D2: formalización. D3: `busqueda_prompt/algoritmos/coordenadas.py`, con `OraculoContado` y
+   la forma de `fuerza_bruta.resolver`.
+2. D4: primer arranque el sábado, con caché en Drive.
+3. D5 a D9: búsqueda, análisis de fallos, notebook, configuración congelada el domingo por la
+   noche, `oraculo.validar` una vez y `entrega.json`.
+4. D10 y D11: secciones 04 y 06 del informe y `docs/manual_tecnico.md`.
+
+**Plan de contingencia:** si el sábado por la noche no hay fecha clara para el primer arranque,
+o el domingo al mediodía no hay una pasada real en curso, Sebastián toma coordenadas y la búsqueda.
+Sin búsqueda real no hay entrega.
+
+### Riesgos abiertos
+
+- Colab puede cortar la sesión: 14 400 generaciones son unas 8 h, hasta 10 h con margen. Dividir
+  entre las dos cuentas con el mismo caché en Drive.
+- Datos privados: si traen familias que no estén en IFEvalG, `oraculo.py` lanza `KeyError` y el
+  notebook de evaluación no carga verificadores extra. No se ha podido confirmar.
+- `notebooks/evaluacion.ipynb` clona `main`: `entrega.json` debe estar en `main` antes de la prueba final.
+- La velocidad sale de una sola configuración; otras pueden tardar más.
 
 ### Pendientes del equipo
 
-- Identificador real del grupo y semana para `entrega.json`; el notebook trae `G07` y `3`.
-- Primera entrega: lunes 2026-11-02 a medianoche. Faltan las fechas de las demás etapas.
+- Identificador real del grupo y semana para `entrega.json`; el notebook trae `G07` y `3`, y el
+  nombre de la guía sugiere Grupo 1, sin confirmar.
+- Confirmar si "medianoche" es el final del lunes y cómo se entrega: enlace al repositorio, PDF o ambos.
+- Fechas de las demás etapas del cronograma.
 - Política de declaración de herramientas de apoyo: por definir.
 
 ---
 
 ## 9. Mantenimiento de esta guía
 
-- Actualiza la sección 8 al cerrar cada bloque.
+- Actualiza la sección 8 al cerrar cada sesión: es el punto de partida de la siguiente.
 - Una decisión nueva entra en la sección 5 con ID estable y en la bitácora.
