@@ -44,3 +44,52 @@ presupuesto de consultas.
 
 \paragraph{Supuestos y alcance.} El oráculo calcula $\Acc(c)$ en tiempo polinomial, como en
 CONFIG-EXACTA. Esta parte solo sirve para el análisis de dureza.
+
+\subsection{Parte 2: búsqueda con consultas limitadas o ruidosas}
+
+\paragraph{Contexto.} El oráculo es un modelo de lenguaje y cada consulta es una
+generación en GPU. Con temperatura $0{,}0$ la generación es, en principio, determinista
+(D2). En GPU pueden aparecer diferencias numéricas pequeñas; esto es una inferencia, no
+una medición. El caché hace repetibles las consultas ya hechas. Por eso la variabilidad
+relevante no viene del modelo sino de qué instancias se miden, en coherencia con el
+análisis de la sección~\ref{sec:reduccion}.
+
+\paragraph{Entrada y tamaño.} El mismo espacio $(L,k_1,\dots,k_L)$, el lote de instancias
+$I$, el presupuesto $B$ y la semilla. El tamaño vuelve a depender de $L$, de los $k_i$ y de $n$.
+
+\paragraph{Contabilidad de $B$.} $B$ cuenta las generaciones nuevas por (configuración,
+instancia, semilla) (D11). Una pareja ya generada y guardada en el caché no se cobra.
+
+\paragraph{Salida.} Las consultas $m_j$ por configuración $c_j$ y una configuración
+ganadora $c^*$.
+
+\paragraph{Objetivo y restricciones.} Maximizar $\Acc(c^*)$ sujeto a $\sum_j m_j\le B$.
+
+\paragraph{Supuestos y alcance.} $c^*$ es la mejor configuración encontrada, no un óptimo
+demostrado: el algoritmo no recorre $\conf$ ni garantiza haberlo hecho. Lo que $\Acc(c^*)$
+mide es el desempeño sobre el lote de búsqueda, no fuera de él.
+
+\subsection{Planteamiento específico de esta entrega}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Elemento & Valor \\
+\midrule
+Espacio explorado & 5 ranuras de 8 opciones, $|\conf|=32\,768$ \\
+Temperatura & fija en $0{,}0$ \\
+Lote de búsqueda & 100 instancias de \texttt{datos\_visibles.json} \\
+Métrica & $\Acc$, todo-o-nada \\
+Modelo y semilla & \texttt{qwen17b}, semilla 1 \\
+Presupuesto & $B=14\,400$ generaciones (D17) \\
+Validación & 87 instancias, una sola vez sobre la configuración elegida \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+La validación se usa solo después de elegir la configuración: si interviniera en la
+elección, dejaría de ser una prueba independiente.
+
+\paragraph{Fuera de esta entrega.} Quedan fuera el backtracking, el reparto uniforme
+frente a UCB1, los barridos y las gráficas de $T(n)$, y el exacto sobre un subcatálogo
+(D17). Successive Halving se descartó y no se implementa (D4).
