@@ -179,7 +179,7 @@ su interior y lanza `PresupuestoAgotado`.
 
 ## 8. Estado actual del repositorio
 
-- Fase: formalización, sin código. Los archivos del repositorio base aún no están aquí.
+- Fase: formalización. Los archivos del repositorio base están en la raíz, sin cambios, desde el commit `4d8358d` de la base.
 - Primera tarea técnica: medir la velocidad real en Colab, porque define D8 y el
   número de arranques.
 

@@ -279,7 +279,7 @@ Semanas relativas al cronograma; las fechas reales siguen pendientes.
 ## 13. Pendientes antes de implementar
 
 1. Confirmar entre los dos las decisiones D1 a D12 y el reparto.
-2. Incorporar los archivos del repositorio base y crear `pyproject.toml`.
+2. Crear `pyproject.toml`.
 3. Integrar los contratos.
 4. Agregar a Dylber como colaborador y proteger `main`.
 5. Instalar el entorno en ambos equipos y verificar que `pytest` corre.
