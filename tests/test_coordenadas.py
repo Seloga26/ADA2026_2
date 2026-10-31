@@ -77,3 +77,45 @@ def test_orden_invalido():
     ranuras, oraculo, instancias = _caso(9)
     with pytest.raises(ValueError):  # se espera un ValueError por validación de argumentos
         coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, orden_ranuras=["x"])  # "x" no es una ranura, no es permutación
+
+
+def test_las_opciones_excluidas_nunca_se_evaluan():  # las excluidas no aparecen ni al arrancar ni al probar candidatas
+    ranuras, oraculo, instancias = _caso(10, conflictos=2)
+    excl = {ranuras[0]: {0, 1}, ranuras[2]: {2}}  # dos opciones de la primera ranura y una de la tercera
+    hist = []
+    r = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, arranques=3,
+                             opciones_excluidas=excl, historial=hist)
+    for fila in hist:  # revisa cada config evaluada
+        if fila["config"]:  # las filas de decisión no traen config
+            import json  # la config está guardada como texto JSON
+            c = json.loads(fila["config"])
+            for ranura, malas in excl.items():
+                assert c[ranura] not in malas  # ninguna config usa una opción excluida
+    for ranura, malas in excl.items():
+        assert r.ganadora[ranura] not in malas  # la ganadora tampoco
+
+
+def test_excluir_todas_las_opciones_de_una_ranura_falla():
+    ranuras, oraculo, instancias = _caso(11)
+    with pytest.raises(ValueError):
+        coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias,
+                             opciones_excluidas={ranuras[1]: {0, 1, 2}})  # la ranura 1 tiene 3 opciones: se excluyen todas
+
+
+def test_excluir_una_ranura_desconocida_falla():
+    ranuras, oraculo, instancias = _caso(12)
+    with pytest.raises(ValueError):
+        coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, opciones_excluidas={"zzz": {0}})
+
+
+def test_el_motivo_queda_escrito_en_decision(tmp_path):
+    ranuras, oraculo, instancias = _caso(13)
+    ruta = tmp_path / "h.csv"
+    coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, ruta_historial=str(ruta),
+                         motivo="fallan las listas", orden_ranuras=list(reversed(ranuras)),
+                         opciones_excluidas={ranuras[0]: {3}})
+    with open(ruta, encoding="utf-8") as f:
+        filas = list(csv.DictReader(f))
+    assert filas[0]["decision"].startswith("decide: fallan las listas")  # la decisión es la primera fila
+    assert "excluidas=" in filas[0]["decision"] and "orden=" in filas[0]["decision"]  # y trae orden y exclusiones
+    assert filas[1]["decision"] == "inicio"  # después viene el arranque normal

@@ -54,13 +54,18 @@ class _Registro:  # clase auxiliar; el "_" inicial indica que es de uso interno 
 
 def resolver(oraculo, ranuras, opciones, instancias, semilla=1, presupuesto=None,
              arranques=1, max_pasadas=2, temperatura=0.0, semilla_busqueda=0,
-             orden_ranuras=None, historial=None, ruta_historial=None, mostrar=None):
+             orden_ranuras=None, historial=None, ruta_historial=None, mostrar=None,
+             opciones_excluidas=None, motivo=None):
     """Devuelve la mejor config hallada entre todos los arranques.
 
     `historial` (lista) recibe una fila por evaluación con las columnas de
     `COLUMNAS`; `ruta_historial` las agrega además a un CSV. `mostrar` es un
     callable opcional que recibe cada fila (por ejemplo `print`). Si el
     presupuesto se agota, devuelve lo mejor visto hasta ese momento.
+
+    `opciones_excluidas` ({ranura: opciones}) descarta opciones que el análisis de
+    fallos mostró inútiles: ni se prueban ni se usan al arrancar. `motivo` es el
+    texto de esa decisión; queda escrito en la columna `decision` al inicio.
     """
     # --- Validación de argumentos: fallar pronto y con mensaje claro ---
     if arranques < 1 or max_pasadas < 1:  # sin al menos un arranque y una pasada no hay búsqueda
@@ -72,6 +77,13 @@ def resolver(oraculo, ranuras, opciones, instancias, semilla=1, presupuesto=None
     if sorted(orden) != sorted(ranuras):  # el orden debe contener exactamente las mismas ranuras, sin faltar ni repetir
         raise ValueError("orden_ranuras debe ser una permutación de ranuras")
     tam = dict(zip(ranuras, opciones))  # zip empareja ranura↔nº de opciones; dict lo vuelve diccionario {ranura: k}
+    excluidas = {r: set(v) for r, v in (opciones_excluidas or {}).items()}  # copia a conjuntos; "or {}" cubre el caso None
+    if set(excluidas) - set(ranuras):  # diferencia de conjuntos: llaves que no son ranuras
+        raise ValueError("opciones_excluidas trae ranuras desconocidas")
+    # Opciones permitidas por ranura: todas las 0..k-1 menos las excluidas (comprensión de diccionario con lista).
+    permitidas = {r: [o for o in range(tam[r]) if o not in excluidas.get(r, ())] for r in ranuras}
+    if any(not p for p in permitidas.values()):  # una ranura sin ninguna opción permitida no se puede buscar
+        raise ValueError("opciones_excluidas deja una ranura sin opciones")
 
     # Un solo contador para todos los arranques: no cobra dos veces la misma (config, instancia, semilla).
     contado = OraculoContado(oraculo, presupuesto)
@@ -87,7 +99,12 @@ def resolver(oraculo, ranuras, opciones, instancias, semilla=1, presupuesto=None
             # Generador aleatorio propio; la semilla es un texto "semilla|a", así cada arranque es distinto pero reproducible.
             rng = random.Random(f"{semilla_busqueda}|{a}")
             # Config inicial: una opción al azar por ranura (comprensión de diccionario) y se une la temperatura con "|" (unión de dicts).
-            actual = {r: rng.randrange(tam[r]) for r in ranuras} | {"temperatura": temperatura}
+            # rng.choice elige una opción permitida al azar (las excluidas nunca salen como punto de partida).
+            actual = {r: rng.choice(permitidas[r]) for r in ranuras} | {"temperatura": temperatura}
+            if motivo:  # si hay una decisión tomada con las trazas, queda escrita antes de buscar
+                detalle = f"decide: {motivo}; orden={orden}; excluidas={ {r: sorted(v) for r, v in excluidas.items()} }"  # texto con orden y exclusiones aplicadas
+                registro.anotar(arranque=a, ranura="", opcion="", config="", precision="",  # fila sin evaluación: solo documenta
+                                mejor_precision="", consultas=contado.consultas, decision=detalle)
             p_actual = evaluar(actual)  # precisión de la config de partida (cuesta n generaciones)
             registro.anotar(arranque=a, ranura="", opcion="", config=clave_config(actual),  # fila "inicio": aún no se cambia ninguna ranura
                             precision=p_actual, mejor_precision=p_actual,  # al inicio la mejor del arranque es la propia
@@ -98,7 +115,7 @@ def resolver(oraculo, ranuras, opciones, instancias, semilla=1, presupuesto=None
             for _ in range(max_pasadas):  # "_" = variable que no se usa; repite hasta max_pasadas pasadas
                 mejoro = False  # bandera: ¿esta pasada logró alguna mejora?
                 for ranura in orden:  # recorre las ranuras en el orden configurado
-                    for opcion in range(tam[ranura]):  # prueba cada opción 0..k-1 de esta ranura
+                    for opcion in permitidas[ranura]:  # prueba cada opción permitida de esta ranura (sin las excluidas)
                         if opcion == actual[ranura]:  # esa opción ya es la actual y ya se midió
                             continue  # salta a la siguiente opción sin gastar consultas
                         candidata = dict(actual, **{ranura: opcion})  # copia de actual cambiando solo esta ranura
