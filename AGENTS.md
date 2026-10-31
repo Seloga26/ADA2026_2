@@ -133,6 +133,7 @@ Se tomaron sin posibilidad de nueva consulta a la docente.
 | **D14** | Se prepara la primera entrega consolidada: informe, repositorio, manual técnico y los tres archivos de ADAG1. | La guía aclara que es una propuesta por confirmar; cumplirla completa es lo más seguro. |
 | **D15** | La NP-dureza cubre solo la parte 1, configuración óptima con oráculo exacto. La parte 2, consultas ruidosas o limitadas, se analiza por complejidad de muestreo. | La guía prohíbe trasladar la demostración sin justificarla. |
 | **D16** | Rutas: `entrega.json` en la raíz, `notebooks/busqueda.ipynb`, `notebooks/evaluacion.ipynb` y `docs/manual_tecnico.md`. La configuración debe ser la misma en los tres primeros. | La guía exige coherencia entre ellos. |
+| **D17** | Búsqueda real: `B = 14 400` generaciones, con dos arranques de hasta 2 pasadas cada uno. Un tercer arranque solo si sobra GPU antes del congelamiento. | Medido: 1,99 s por generación en T4, unas 4 h por arranque. El subcatálogo no entra en esta entrega. |
 
 ---
 
@@ -192,7 +193,7 @@ su interior y lanza `PresupuestoAgotado`.
 
 - Fase: primera entrega. Los archivos del repositorio base están en la raíz, sin cambios, desde el commit `4d8358d` de la base.
 - Listos: contratos, `OraculoContado`, modelo sintético, fuerza bruta, validación de `entrega.json`, reducción y notebooks de medición y evaluación. Falta probar los notebooks en Colab.
-- Primera tarea técnica: medir la velocidad real en Colab, porque define D8 y el
+- Velocidad medida en Colab: 1,99 s por generación, 5,77 GB de VRAM (`resultados/velocidad.json`). Define D8 y el
   número de arranques.
 
 ### Pendientes del equipo

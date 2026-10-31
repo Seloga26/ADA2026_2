@@ -1,0 +1,17 @@
+{
+ "modelo": "Qwen/Qwen3-1.7B",
+ "gpu": "Tesla T4",
+ "config": {
+  "rol": 2,
+  "estrategia": 1,
+  "formato": 4,
+  "estilo": 1,
+  "cierre": 7,
+  "temperatura": 0.0
+ },
+ "generaciones": 100,
+ "segundos": 199.08,
+ "segundos_por_generacion": 1.991,
+ "vram_pico_gb": 5.77,
+ "precision": 0.06
+}
