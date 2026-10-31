@@ -283,7 +283,7 @@ Semanas relativas al cronograma; las fechas reales siguen pendientes.
 |---|---|---|
 | H1 | Primero | Contratos integrados y velocidad real medida |
 | H2 | Antes de la primera entrega | Coordenadas, sintético, pruebas y borrador de formalización y reducción |
-| H3 | Primera entrega | Búsqueda real ejecutada, los tres archivos coherentes, informe y manual |
+| H3 | Lunes 2026-11-02, medianoche | Búsqueda real ejecutada, los tres archivos coherentes, informe y manual |
 | H4 | S6 | Backtracking y T(n) revisados |
 | H5 | S8 | UCB1, uniforme y garantías; primer simulacro |
 | H6 | S10 | Experimentos, gráficas e informe completos; segundo y tercer simulacro |

@@ -10,6 +10,7 @@
 - Las decisiones de la sección 5 ya están cerradas; solo se reabren con evidencia nueva.
 - Antes de proponer un cambio, revisa si la sección 5 ya lo resuelve.
 - El plan completo está en `docs/plan.md`.
+- El reparto de la primera entrega está en `docs/reparto_primera_entrega.md`.
 - Anota cada sesión importante en `docs/bitacora/`.
 - Forma de trabajo: se propone, se aprueba y se ejecuta.
 
@@ -196,7 +197,7 @@ su interior y lanza `PresupuestoAgotado`.
 ### Pendientes del equipo
 
 - Identificador real del grupo y semana para `entrega.json`; el notebook trae `G07` y `3`.
-- Fechas reales del cronograma.
+- Primera entrega: lunes 2026-11-02 a medianoche. Faltan las fechas de las demás etapas.
 - Política de declaración de herramientas de apoyo: por definir.
 
 ---
