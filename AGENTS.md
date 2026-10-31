@@ -25,6 +25,7 @@
 | Repositorio remoto | `https://github.com/Seloga26/ADA2026_2.git` (`origin`) |
 | Repositorio base indicado | `https://github.com/JuManoel/ADA-2026-2-GP01` |
 | Enunciado | `Proyecto_ADAG1.docx` |
+| Guía de la primera entrega | `Guia_Primera_Entrega_ADAG_2026B_Actualizada_Grupo1.pdf` |
 
 **Problema.** Encontrar la mejor configuración de prompt para un modelo de lenguaje
 gastando el menor número de consultas. Salida: consultas m_j por configuración y una
@@ -52,9 +53,9 @@ bloque teórico lo rederiva solo antes de aprobar.
 | Bloque | Principal | Revisor |
 | --- | --- | --- |
 | B0. Contratos, `pyproject.toml`, README | Sebastián López | Dylber Cabrera |
-| B1. Formalización escrita | Dylber Cabrera | Sebastián López |
+| B1. Formalización de las dos partes | Dylber Cabrera | Sebastián López |
 | B2. `OraculoContado`, `OraculoSintetico`, fuerza bruta, velocidad real en Colab | Sebastián López | Dylber Cabrera |
-| B3. Reducción NP desde Cobertura Máxima | Sebastián López | Dylber Cabrera |
+| B3. Reducción desde 3-SAT y análisis de muestreo | Sebastián López | Dylber Cabrera |
 | B4. Medición y gráficas (`medir.py`, `graficar.py`, ajuste log-log) | Dylber Cabrera | Sebastián López |
 | B5. Backtracking con cota, sintético y subcatálogo | Sebastián López | Dylber Cabrera |
 | B6. Búsqueda por coordenadas | Dylber Cabrera | Sebastián López |
@@ -62,6 +63,9 @@ bloque teórico lo rederiva solo antes de aprobar.
 | B8. Experimentación final, validación y `entrega.json` | Los dos | Cruzado |
 | B9. Informe | Sebastián López integra; cada uno redacta lo suyo | Cruzado |
 | B10. Sustentación, demo y simulacros | Los dos | — |
+| B11. Notebook de búsqueda y `entrega.json` | Dylber Cabrera | Sebastián López |
+| B12. Notebook de evaluación | Sebastián López | Dylber Cabrera |
+| B13. Manual técnico | Dylber Cabrera integra; cada uno documenta lo suyo | Sebastián López |
 
 ---
 
@@ -120,10 +124,14 @@ Se tomaron sin posibilidad de nueva consulta a la docente.
 | **D6** | Las cotas por estructura de reglas solo se usan en el modelo sintético. Con el modelo real no se poda con supuestos. | Una poda no demostrada deja de ser exacta. |
 | **D7** | El modelo sintético mide el exacto con al menos 5 tamaños; el real da los resultados de precisión. | El exacto completo real serían 3 276 800 generaciones. |
 | **D8** | Con el modelo real, el exacto corre en un subcatálogo: 3 mejores opciones por ranura (243 configuraciones) o 2 (32) según la velocidad medida. Se reporta "óptimo del subcatálogo". | Nunca se afirma óptimo global. |
-| **D9** | Reducción desde Cobertura Máxima, versión de decisión, con L y k_i como parte de la entrada; el proyecto es el caso L = 5. | Con L fijo, \|C\| es constante. |
+| **D9** | Reducción desde 3-SAT, versión de decisión, con L y k_i como parte de la entrada; el proyecto es el caso L = 5. | Lo indica la guía para ADAG1. Con L fijo, \|C\| es constante. |
 | **D10** | Dos barridos: n ∈ {10, 25, 50, 75, 100} con \|C\| fijo, y \|C\| = 2^L con n fijo. | T depende de ambas variables. |
 | **D11** | B se fija y se cuenta aquí: generaciones nuevas por (config, instancia, semilla). | El oráculo no limita consultas. |
 | **D12** | `validar` con n = 87 se usa una sola vez, sobre la configuración ya elegida. | Si se elige con validación, deja de ser prueba. |
+| **D13** | La guía de la primera entrega manda sobre el enunciado en esa entrega y en la reducción. El informe registra la discrepancia con Cobertura Máxima. | Es más reciente y específica de ADAG1. |
+| **D14** | Se prepara la primera entrega consolidada: informe, repositorio, manual técnico y los tres archivos de ADAG1. | La guía aclara que es una propuesta por confirmar; cumplirla completa es lo más seguro. |
+| **D15** | La NP-dureza cubre solo la parte 1, configuración óptima con oráculo exacto. La parte 2, consultas ruidosas o limitadas, se analiza por complejidad de muestreo. | La guía prohíbe trasladar la demostración sin justificarla. |
+| **D16** | Rutas: `entrega.json` en la raíz, `notebooks/busqueda.ipynb`, `notebooks/evaluacion.ipynb` y `docs/manual_tecnico.md`. La configuración debe ser la misma en los tres primeros. | La guía exige coherencia entre ellos. |
 
 ---
 
@@ -155,13 +163,15 @@ ADA2026_2/
     contratos.py, sintetico.py, contado.py
     algoritmos/           fuerza_bruta, backtracking, coordenadas, reparto_uniforme, ucb1
     experimentos/         medir.py, graficar.py
+  entrega.json
+  notebooks/              busqueda.ipynb, evaluacion.ipynb
   tests/
   resultados/
   informe/
-  docs/bitacora/
+  docs/                   plan.md, manual_tecnico.md, bitacora/
 ```
 
-La celda 4 del notebook solo importa y llama a `busqueda_prompt`.
+`proyecto_oraculo.ipynb` queda como referencia. Los notebooks propios importan `busqueda_prompt`.
 
 Contratos:
 
@@ -179,7 +189,7 @@ su interior y lanza `PresupuestoAgotado`.
 
 ## 8. Estado actual del repositorio
 
-- Fase: formalización. Los archivos del repositorio base están en la raíz, sin cambios, desde el commit `4d8358d` de la base.
+- Fase: primera entrega. Los archivos del repositorio base están en la raíz, sin cambios, desde el commit `4d8358d` de la base.
 - Primera tarea técnica: medir la velocidad real en Colab, porque define D8 y el
   número de arranques.
 

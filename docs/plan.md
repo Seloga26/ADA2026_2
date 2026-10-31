@@ -1,6 +1,6 @@
 # Plan del Proyecto Oráculo
 
-Plan de trabajo de Sebastián López y Dylber Cabrera. Las decisiones D1 a D12 están en
+Plan de trabajo de Sebastián López y Dylber Cabrera. Las decisiones D1 a D16 están en
 la sección 5 de `AGENTS.md`; este documento las desarrolla. Si hay diferencias, vale
 `AGENTS.md`.
 
@@ -19,7 +19,7 @@ Lo marcado como **interpretación** no aparece en el enunciado ni en el reposito
 - Entrada: C, I = {i₁…iₙ} y el presupuesto B.
 - Salida: m_j consultas por configuración c_j y una ganadora c* ∈ C.
 - Objetivo: maximizar Acc(c*) sujeto a Σ m_j ≤ B.
-- Clase: NP-difícil, por reducción polinomial desde Cobertura Máxima.
+- Clase: NP-difícil. El enunciado indica Cobertura Máxima y la guía de la primera entrega, 3-SAT (D13).
 
 ### 1.2 Requisitos
 
@@ -43,6 +43,31 @@ Lo marcado como **interpretación** no aparece en el enunciado ni en el reposito
 
 Los pesos y el cronograma están en la sección 1 de `AGENTS.md`.
 
+### 1.4 Primera entrega
+
+Según `Guia_Primera_Entrega_ADAG_2026B_Actualizada_Grupo1.pdf`. La guía aclara que la fecha
+única es una propuesta por confirmar; se prepara completa (D14).
+
+| Producto | Contenido mínimo | Bloque |
+|---|---|---|
+| Informe | Formalización de las dos partes y NP-dureza; además, el proceso real que produjo `entrega.json` | B1, B3 |
+| Repositorio | Código ejecutable, README con integrantes y versión, dependencias, semillas, resultados esperados y un caso que respete las restricciones | B0, B2, B6 |
+| Manual técnico | Entorno, arquitectura, funcionamiento, uso, validación y límites | B13 |
+| `entrega.json` | Grupo, semana, índices de las 5 ranuras y temperatura; JSON válido | B11 |
+| Notebook de evaluación | Carga `entrega.json` y evalúa sobre datos privados sin editar nada | B12 |
+| Notebook de búsqueda | Método, configuraciones probadas, precisiones, fallos, decisiones y `oraculo.validar` | B11 |
+
+**Solución base:** búsqueda por coordenadas, `OraculoContado`, modelo sintético, fuerza bruta y
+pruebas. **Interpretación:** backtracking, UCB1 y los barridos no son parte de la solución base;
+el manual los declara como no desarrollados si aún no están listos.
+
+Exigencias que el informe y el notebook deben cumplir:
+
+- Distinguir el mejor resultado observado de un óptimo demostrado.
+- Cada fallo analizado debe explicar qué opción descartó y cómo cambió la búsqueda.
+- No confundir `oraculo.validar` con la evaluación privada de la docente.
+- El informe referencia las celdas del notebook y permite reconstruir la decisión final.
+
 ---
 
 ## 2. Discrepancias del enunciado
@@ -57,6 +82,7 @@ El informe las presenta en una tabla, con la decisión tomada en cada caso.
 | Categorías | Rol, Estrategia, Formato, Verificación, Recordatorio | `rol`, `estrategia`, `formato`, `estilo`, `cierre` | Las del repositorio (D1) |
 | Instancias "sintéticas" | Todas sintéticas | Modelo real en Colab | Ambas, con funciones distintas (D7) |
 | Exacto | Fuerza bruta o PD en el cronograma; backtracking en §4.3 | Sin definir | Backtracking; fuerza bruta como referencia (D3) |
+| Reducción | Cobertura Máxima | La guía de la primera entrega indica 3-SAT | 3-SAT (D9, D13) |
 
 Otras inconsistencias comprobadas:
 
@@ -114,16 +140,39 @@ n₀ = 2 casi todas marcarían 0 % y no se podrían separar.
 - Esa cota supone muestras independientes. Aquí se muestrea sin reposición sobre 100
   instancias, lo que se declara como aproximación.
 
-### 3.5 Reducción desde Cobertura Máxima
+### 3.5 Parte 1: reducción desde 3-SAT
 
-1. Dada (U, S, k), construir L = k categorías, cada una con opciones = S.
-2. Crear una instancia por elemento de U, que exige una regla.
-3. Una instancia se cumple si y solo si su elemento está en la unión de los subconjuntos elegidos.
-4. Usar un oráculo determinista y B = \|C\|·n, para que el presupuesto no restrinja.
-5. Así, maximizar la precisión equivale a maximizar la cobertura.
+**Problema de decisión.** Dado un catálogo de L categorías, n instancias, un oráculo exacto
+evaluable en tiempo polinomial y un umbral t, ¿existe c con Acc(c) ≥ t?
 
-La construcción usa k·\|S\| opciones y \|U\| instancias, de modo que es polinomial. Se
-presenta en versión de decisión ("¿existe c* con Acc ≥ t?") y con ambas direcciones.
+Construcción, dada una fórmula φ con m variables y q cláusulas:
+
+1. Crear L = m categorías, una por variable, con 2 opciones: falso y verdadero.
+2. Crear n = q instancias, una por cláusula. La instancia j exige la regla j.
+3. La opción de x_i satisface la regla j si ese valor hace verdadero un literal de la cláusula j.
+4. Fijar t = 1.
+
+Una configuración es entonces una asignación de verdad, y la instancia j se cumple si y solo
+si la cláusula j es verdadera. El tamaño es O(m + q), aunque \|C\| = 2^m, porque la entrada es
+el catálogo y no la lista de configuraciones.
+
+- (⇒) Si φ es satisfacible, su asignación da una configuración con Acc = 1.
+- (⇐) Si Acc(c) = 1, c cumple todas las instancias y su asignación satisface φ.
+
+Pertenece a NP porque el certificado c se verifica con n evaluaciones. Por lo tanto, la
+versión de decisión es NP-completa y la de optimización, NP-difícil. La construcción no usa
+ruido ni presupuesto: el caso L = 5 del proyecto es finito y no hereda dureza por sí solo.
+
+### 3.6 Parte 2: consultas ruidosas o limitadas
+
+No hereda la demostración anterior (D15). Se analiza cuántas muestras hacen falta:
+
+- Si cada consulta es una muestra independiente con éxito Acc(c), Hoeffding y la unión dan que
+  m ≥ ln(2\|C\|/δ) / (2ε²) consultas por configuración estiman todas con error ≤ ε, con
+  probabilidad ≥ 1 − δ.
+- Separar dos configuraciones con diferencia Δ exige m del orden de ln(1/δ)/Δ².
+- Con n = 100 instancias fijas, la resolución de la medición es de 1 %.
+- Costo: cada muestra es una generación en GPU, medida con `OraculoContado`.
 
 ---
 
@@ -137,7 +186,7 @@ presenta en versión de decisión ("¿existe c* con Acc ≥ t?") y con ambas dir
   son independientes.
 - El éxito ocurre si R_i ⊆ ∪S − conflictos. Con ruido, se invierte con probabilidad p,
   determinista por (semilla, c, i).
-- El modo sin ruido coincide con la reducción.
+- El modo sin ruido, sin conflictos y con una regla por instancia coincide con la reducción.
 - El peor caso se construye con instancias donde la cota no poda.
 
 ---
@@ -152,8 +201,10 @@ presenta en versión de decisión ("¿existe c* con Acc ≥ t?") y con ambas dir
 - **Límite:** \|C\| = 1, categoría con k = 1, n = 1, B exacto, B menor que \|C\|, empates
   con desempate determinista y todas las configuraciones en 0 %.
 - **Errores:** `PresupuestoAgotado`, parámetros inválidos y reproducibilidad por semilla.
-- **Reducción:** en una instancia generada desde Cobertura Máxima, el backtracking reproduce
-  el óptimo de cobertura de la fuerza bruta.
+- **Reducción:** en fórmulas 3-SAT pequeñas, Acc = 1 se alcanza si y solo si la fuerza bruta
+  sobre las asignaciones encuentra una que las satisface.
+- **Entrega:** `entrega.json` es válido, sus índices están en rango y coincide con la ganadora
+  del notebook de búsqueda.
 
 ---
 
@@ -187,11 +238,11 @@ la fuente hasta la entrega final; las instrucciones están en `informe/README.md
 Sebastián integra `main.tex` y compila la versión final.
 
 1. Formalización.
-2. Reducción desde Cobertura Máxima.
+2. Reducción desde 3-SAT y análisis de muestreo.
 3. Exacto: algoritmo, pseudocódigo, correctitud y T(n).
 4. Aproximados: coordenadas y UCB1, con T(n) y garantías.
 5. Comparación de reparto y descarte de Successive Halving.
-6. Diseño experimental y resultados.
+6. Proceso de optimización, resultados y validación, con referencias al notebook de búsqueda.
 7. Discrepancias y limitaciones.
 8. Referencias, en `referencias.bib`.
 
@@ -199,10 +250,12 @@ Sebastián integra `main.tex` y compila la versión final.
 
 ## 8. Dependencias y paralelismo
 
-- **En paralelo desde el inicio:** B0, B1 y B4, este último con un oráculo trivial que cumpla el contrato.
+- **En paralelo desde el inicio:** B0, B1, B3 y B12.
 - **Cadenas:**
   - B2 depende de B0.
   - B5, B6 y B7 dependen de B0 y B2; mientras tanto, avanzan con un doble de prueba.
+  - B11 depende de B6 y de la velocidad medida en B2.
+  - B13 se cierra cuando B6 y B12 están listos.
   - B3 no depende del código, pero B2 incluye el modo de la reducción.
   - B8 depende de B4 y de B5 a B7.
 - **Regla:** nadie espera. Si falta algo, se programa contra el contrato.
@@ -228,10 +281,10 @@ Semanas relativas al cronograma; las fechas reales siguen pendientes.
 
 | Hito | Semana | Integración y revisión |
 |---|---|---|
-| H1 | Fin de S1 | Contratos integrados y velocidad real medida |
-| H2 | S2 | Entrega de la formalización |
-| H3 | S4 | Entrega de la reducción; sintético y medición en `main` |
-| H4 | S6 | Backtracking y T(n) revisados; coordenadas funcional |
+| H1 | Primero | Contratos integrados y velocidad real medida |
+| H2 | Antes de la primera entrega | Coordenadas, sintético, pruebas y borrador de formalización y reducción |
+| H3 | Primera entrega | Búsqueda real ejecutada, los tres archivos coherentes, informe y manual |
+| H4 | S6 | Backtracking y T(n) revisados |
 | H5 | S8 | UCB1, uniforme y garantías; primer simulacro |
 | H6 | S10 | Experimentos, gráficas e informe completos; segundo y tercer simulacro |
 | H7 | S11 | Entrega final y sustentaciones |
@@ -243,7 +296,8 @@ Semanas relativas al cronograma; las fechas reales siguen pendientes.
 | Requisito | Tarea | Responsable | Terminado cuando… |
 |---|---|---|---|
 | §2/§4.2 Definir n, entrada, salida y objetivo | B1 | Dylber | Documento entregado, con L variable y la tabla de discrepancias |
-| §4.4 NP-dureza desde Cobertura Máxima | B3 | Sebastián | Construcción, polinomialidad y ambas direcciones; ambos la exponen sin notas |
+| §4.4 y guía: NP-dureza desde 3-SAT | B3 | Sebastián | Versión de decisión, construcción, polinomialidad y ambas direcciones; ambos la exponen sin notas |
+| Guía §7.4: consultas ruidosas | B3 | Sebastián | Análisis de muestreo separado de la demostración |
 | §4.3-1 Backtracking con poda | B5 | Sebastián | Coincide con fuerza bruta en al menos 20 semillas y pasa las pruebas límite |
 | §4.3-1 Derivar O(\|C\|·n) y medir la poda | B5, B8 | Sebastián | Deducción en el informe y gráfica de nodos y consultas en casos favorable y peor |
 | §4.3-3 Coordenadas y riesgo de óptimos locales | B6 | Dylber | T(n), demostración de monotonía, contraejemplo y medición con varios arranques |
@@ -255,7 +309,11 @@ Semanas relativas al cronograma; las fechas reales siguen pendientes.
 | §5 Informe técnico | B9 | Sebastián integra | Secciones completas y revisadas por ambos |
 | §5 Sustentación grupal | B10 | Los dos | 3 simulacros cronometrados; cada uno expone reducción y T(n) sin notas |
 | §5 Sustentación individual | B10 | Cada uno | Cada uno modifica en vivo una métrica o formato de salida en cualquier módulo |
-| Repositorio base: `entrega.json` | B8 | Los dos | Configuración elegida, validada una sola vez y entregada con grupo y semana reales |
+| Guía §7.2: `entrega.json` | B11 | Dylber | JSON válido, con grupo y semana reales, y la misma configuración de los notebooks |
+| Guía §7.2-7.3: notebook de búsqueda | B11 | Dylber | Método, registro, fallos con decisiones y `oraculo.validar` visibles |
+| Guía §7.2: notebook de evaluación | B12 | Sebastián | Corre sin editar nada y sin datos privados durante su preparación |
+| Guía §5: repositorio | B0, B6 | Los dos | Un clon limpio ejecuta el ejemplo pequeño con su resultado esperado |
+| Guía §6: manual técnico | B13 | Dylber integra | Otra persona instala y ejecuta sin ayuda |
 
 ---
 
@@ -265,6 +323,11 @@ Semanas relativas al cronograma; las fechas reales siguen pendientes.
 |---|---|
 | La docente esperaba que el enunciado mandara sobre el repositorio | Tabla de discrepancias con la justificación de cada decisión |
 | Reducción mal planteada | Construcción de 3.5, rederivada por ambos antes de entregar |
+| Trasladar la NP-dureza a consultas ruidosas | Partes separadas en 3.5 y 3.6 (D15) |
+| La docente esperaba Cobertura Máxima | Se registra en la tabla de discrepancias y se cita la guía |
+| Notebook de evaluación falla con datos privados desconocidos | Aceptar un archivo con nombre fijo o una carga manual sin editar celdas; probar con un archivo de ejemplo |
+| Los notebooks no pueden clonar el repositorio | Mantener el repositorio accesible y probar en un entorno limpio de Colab |
+| Configuración distinta entre archivos | Prueba automática y lectura directa desde `entrega.json` |
 | La GPU no alcanza para el subcatálogo | Medir velocidad primero; pasar de 243 a 32 configuraciones |
 | Colab se desconecta | Caché en Drive |
 | Búsqueda sin señal por todo-o-nada | Evaluar sobre las 100 instancias |
@@ -278,7 +341,7 @@ Semanas relativas al cronograma; las fechas reales siguen pendientes.
 
 ## 13. Pendientes antes de implementar
 
-1. Confirmar entre los dos las decisiones D1 a D12 y el reparto.
+1. Confirmar entre los dos las decisiones D1 a D16 y el reparto.
 2. Crear `pyproject.toml`.
 3. Integrar los contratos.
 4. Agregar a Dylber como colaborador y proteger `main`.
