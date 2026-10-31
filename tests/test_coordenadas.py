@@ -1,78 +1,79 @@
-import csv
+import csv  # para leer de vuelta el CSV que escribe el algoritmo
 
-import pytest
+import pytest  # framework de pruebas: aporta raises, parametrize y la fixture tmp_path
 
-from busqueda_prompt.algoritmos import coordenadas, fuerza_bruta
-from busqueda_prompt.contratos import PresupuestoAgotado, configuraciones
-from busqueda_prompt.sintetico import generar
+from busqueda_prompt.algoritmos import coordenadas, fuerza_bruta  # algoritmo a probar y el exacto de referencia
+from busqueda_prompt.contratos import PresupuestoAgotado, configuraciones  # excepción esperada y generador de todas las configs
+from busqueda_prompt.sintetico import generar  # crea oráculo sintético e instancias reproducibles
 
-OPCIONES = (4, 3, 3)
-
-
-def _caso(semilla, **kw):
-    return generar(OPCIONES, n=12, reglas=6, semilla=semilla, **kw)
+OPCIONES = (4, 3, 3)  # 3 ranuras con 4, 3 y 3 opciones: 36 configs, espacio pequeño que la fuerza bruta recorre al instante
 
 
-@pytest.mark.parametrize("semilla", range(15))
+def _caso(semilla, **kw):  # ayudante (el "_" indica uso interno); **kw reenvía opciones como conflictos=2
+    # n=12 instancias y 6 reglas posibles; la semilla fija el problema, así que cada prueba es reproducible
+    return generar(OPCIONES, n=12, reglas=6, semilla=semilla, **kw)  # devuelve (ranuras, oraculo, instancias)
+
+
+@pytest.mark.parametrize("semilla", range(15))  # ejecuta la prueba 15 veces, con semilla = 0..14
 def test_la_precision_nunca_baja_y_no_supera_al_optimo(semilla):
-    ranuras, oraculo, instancias = _caso(semilla, conflictos=2)
-    hist = []
+    ranuras, oraculo, instancias = _caso(semilla, conflictos=2)  # desempaqueta la tupla; conflictos hacen el problema más difícil
+    hist = []  # lista donde el algoritmo anotará cada paso
     r = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, arranques=2,
-                             max_pasadas=3, historial=hist)
-    for a in (0, 1):
-        previos = [f["mejor_precision"] for f in hist if f["arranque"] == a]
-        assert previos == sorted(previos)
-    exacto = fuerza_bruta.resolver(oraculo, configuraciones(ranuras, OPCIONES), instancias)
-    assert r.precision <= exacto.precision
+                             max_pasadas=3, historial=hist)  # 2 arranques y hasta 3 pasadas cada uno
+    for a in (0, 1):  # revisa cada arranque por separado
+        previos = [f["mejor_precision"] for f in hist if f["arranque"] == a]  # sucesión de mejores precisiones de ese arranque
+        assert previos == sorted(previos)  # si ya está ordenada de menor a mayor, nunca bajó
+    exacto = fuerza_bruta.resolver(oraculo, configuraciones(ranuras, OPCIONES), instancias)  # óptimo real, probando las 36 configs
+    assert r.precision <= exacto.precision  # un método aproximado jamás puede superar al óptimo
 
 
 def test_una_pasada_cuesta_a_lo_sumo_lo_esperado():
     ranuras, oraculo, instancias = _caso(3)
-    r = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, max_pasadas=1)
-    por_pasada = sum(k - 1 for k in OPCIONES)
-    assert r.consultas <= (1 + por_pasada) * len(instancias)
+    r = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, max_pasadas=1)  # una sola pasada
+    por_pasada = sum(k - 1 for k in OPCIONES)  # por ranura se prueban k-1 opciones (la actual ya se midió): 3+2+2 = 7
+    assert r.consultas <= (1 + por_pasada) * len(instancias)  # 1 config inicial + 7 candidatas, cada una sobre n instancias
 
 
 def test_respeta_el_presupuesto():
     ranuras, oraculo, instancias = _caso(4)
-    tope = 5 * len(instancias)
+    tope = 5 * len(instancias)  # presupuesto de solo 5 configs completas, muy por debajo de lo que pediría la búsqueda
     r = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, presupuesto=tope,
-                             arranques=3, max_pasadas=3)
-    assert r.consultas <= tope
+                             arranques=3, max_pasadas=3)  # pide mucho más de lo que cabe
+    assert r.consultas <= tope  # al agotarse devuelve lo mejor visto sin pasarse del tope
 
 
 def test_presupuesto_que_no_alcanza_para_empezar():
     ranuras, oraculo, instancias = _caso(5)
-    with pytest.raises(PresupuestoAgotado):
-        coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, presupuesto=1)
+    with pytest.raises(PresupuestoAgotado):  # la prueba pasa solo si dentro del bloque se lanza esta excepción
+        coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, presupuesto=1)  # 1 consulta no alcanza ni para la config inicial
 
 
 def test_es_reproducible():
     ranuras, oraculo, instancias = _caso(6, conflictos=1)
-    a = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, arranques=2)
-    b = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, arranques=2)
-    assert (a.ganadora, a.precision, a.consultas) == (b.ganadora, b.precision, b.consultas)
+    a = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, arranques=2)  # primera ejecución
+    b = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, arranques=2)  # segunda, con los mismos argumentos
+    assert (a.ganadora, a.precision, a.consultas) == (b.ganadora, b.precision, b.consultas)  # misma semilla, mismo resultado
 
 
 def test_varios_arranques_no_empeoran():
     ranuras, oraculo, instancias = _caso(7, conflictos=3)
-    uno = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, arranques=1)
-    cinco = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, arranques=5)
-    assert cinco.precision >= uno.precision
+    uno = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, arranques=1)  # un solo arranque
+    cinco = coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, arranques=5)  # incluye el arranque 0, igual al anterior
+    assert cinco.precision >= uno.precision  # más arranques solo pueden dejar igual o mejorar la mejor global
 
 
-def test_escribe_el_csv_con_las_columnas_acordadas(tmp_path):
+def test_escribe_el_csv_con_las_columnas_acordadas(tmp_path):  # tmp_path: carpeta temporal que pytest crea y borra sola
     ranuras, oraculo, instancias = _caso(8)
-    ruta = tmp_path / "historial.csv"
-    coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, ruta_historial=str(ruta))
-    with open(ruta, encoding="utf-8") as f:
-        filas = list(csv.DictReader(f))
-    assert tuple(filas[0]) == coordenadas.COLUMNAS
-    assert filas[0]["decision"] == "inicio"
-    assert {f["decision"] for f in filas} <= {"inicio", "acepta", "descarta"}
+    ruta = tmp_path / "historial.csv"  # el operador "/" une rutas en pathlib
+    coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, ruta_historial=str(ruta))  # str(...) porque el algoritmo espera texto
+    with open(ruta, encoding="utf-8") as f:  # "with" cierra el archivo al salir del bloque
+        filas = list(csv.DictReader(f))  # cada línea se vuelve un diccionario {columna: valor}
+    assert tuple(filas[0]) == coordenadas.COLUMNAS  # las llaves de la primera fila son las columnas, en el orden acordado
+    assert filas[0]["decision"] == "inicio"  # la primera fila registrada es siempre la config de partida
+    assert {f["decision"] for f in filas} <= {"inicio", "acepta", "descarta"}  # conjunto de decisiones contenido en las permitidas (<= es subconjunto)
 
 
 def test_orden_invalido():
     ranuras, oraculo, instancias = _caso(9)
-    with pytest.raises(ValueError):
-        coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, orden_ranuras=["x"])
+    with pytest.raises(ValueError):  # se espera un ValueError por validación de argumentos
+        coordenadas.resolver(oraculo, ranuras, OPCIONES, instancias, orden_ranuras=["x"])  # "x" no es una ranura, no es permutación
