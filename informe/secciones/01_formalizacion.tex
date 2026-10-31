@@ -2,5 +2,45 @@
 \section{Formalización}
 \label{sec:formalizacion}
 
-% Las dos partes por separado. Contexto; entradas y tamaño, sin reducirlo a una variable;
-% salidas; objetivo y restricciones; supuestos y alcance.
+El problema se formaliza en dos partes, cada una con el mismo esquema: contexto, entradas
+y tamaño, salidas, función objetivo y restricciones, y supuestos y alcance. La
+demostración de NP-dureza y el análisis de muestreo están en la
+sección~\ref{sec:reduccion}; aquí solo se fija el problema que ambas estudian.
+
+\subsection{Notación común}
+
+\begin{definicion}[Espacio de configuraciones]
+Hay $L$ categorías y la categoría $i$ ofrece $k_i$ opciones. Una configuración elige una
+opción por categoría. El conjunto de configuraciones es $\conf$ y
+$|\conf|=\prod_{i=1}^{L}k_i$. Un lote $I$ de $n=|I|$ instancias fija las pruebas: cada
+instancia exige un conjunto de restricciones sobre la respuesta del modelo. Una
+configuración \emph{cumple} una instancia si la respuesta generada con ella cumple todas
+sus restricciones; si falta alguna, no la cumple (puntaje todo-o-nada). Con eso,
+$\Acc(c)$ es la fracción de instancias de $I$ que $c$ cumple por completo.
+\end{definicion}
+
+Además, $B$ es el presupuesto de generaciones y $m_j$ las consultas gastadas en la
+configuración $c_j$. Esta definición de cumplir una instancia no usa el modelo de reglas
+de la sección~\ref{sec:reduccion} y es coherente con CONFIG-EXACTA: allí una instancia
+se cumple cuando se satisfacen todas las reglas que exige.
+
+\subsection{Parte 1: configuración óptima con oráculo exacto}
+
+\paragraph{Contexto.} Se supone un oráculo que entrega $\Acc(c)$ exacto, sin ruido y sin
+límite de consultas. Es una abstracción para estudiar la dureza del problema; el problema
+real de esta entrega es la parte 2.
+
+\paragraph{Entrada y tamaño.} La entrada es $(L,k_1,\dots,k_L,I)$. Su tamaño no se reduce
+a una sola variable: depende de $L$, de los $k_i$ y de $n$. Como en la
+sección~\ref{sec:reduccion}, $L$ y los $k_i$ forman parte de la entrada, de modo que
+$|\conf|$ puede crecer de forma exponencial en $L$. El proyecto es el caso $L=5$ y $k_i=8$,
+donde $|\conf|=8^5=32\,768$ es una constante: con $L$ fijo el espacio no crece, aunque
+siga siendo grande para recorrerlo con un modelo real.
+
+\paragraph{Salida.} Una configuración $c\in\conf$.
+
+\paragraph{Objetivo y restricciones.} Maximizar $\Acc(c)$ sobre $c\in\conf$. No hay
+presupuesto de consultas.
+
+\paragraph{Supuestos y alcance.} El oráculo calcula $\Acc(c)$ en tiempo polinomial, como en
+CONFIG-EXACTA. Esta parte solo sirve para el análisis de dureza.
