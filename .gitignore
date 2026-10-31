@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual environments
+.venv
+venv/
+
+# uv
+.uv/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Archivos locales
+.claude/
+prompt_*.md
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Caché del oráculo
+cache_oraculo.json
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.out
+*.toc
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*.xdv
+**/build/

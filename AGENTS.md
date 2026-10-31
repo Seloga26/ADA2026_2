@@ -1,0 +1,197 @@
+# Proyecto Oráculo: guía del equipo
+
+> Aquí está lo acordado para el proyecto. Si algo no coincide con el código,
+> vale el código: revisa `git status` y `git log` antes de seguir.
+
+---
+
+## 0. Uso de esta guía
+
+- Las decisiones de la sección 5 ya están cerradas; solo se reabren con evidencia nueva.
+- Antes de proponer un cambio, revisa si la sección 5 ya lo resuelve.
+- El plan completo está en `docs/plan.md`.
+- Anota cada sesión importante en `docs/bitacora/`.
+- Forma de trabajo: se propone, se aprueba y se ejecuta.
+
+---
+
+## 1. Identidad del proyecto
+
+| Campo | Valor |
+| --- | --- |
+| Materia | Análisis y Diseño de Algoritmos |
+| Período | 2026-2 |
+| Nombre del proyecto | Proyecto Oráculo |
+| Repositorio remoto | `https://github.com/Seloga26/ADA2026_2.git` (`origin`) |
+| Repositorio base indicado | `https://github.com/JuManoel/ADA-2026-2-GP01` |
+| Enunciado | `Proyecto_ADAG1.docx` |
+
+**Problema.** Encontrar la mejor configuración de prompt para un modelo de lenguaje
+gastando el menor número de consultas. Salida: consultas m_j por configuración y una
+configuración ganadora c*. Objetivo: maximizar Acc(c*) sujeto a Σ m_j ≤ B.
+
+| Componente de la nota | Peso |
+| --- | --- |
+| Formalización | 10 % |
+| Reducción | 10 % |
+| T(n) del exacto | 10 % |
+| Aproximado (diseño, T(n) y cota) | 15 % |
+| Validación experimental | 10 % |
+| Sustentación | 45 % |
+
+Cronograma del enunciado, sin fechas: S1-2 formalización, S3-4 reducción, S5-6 exacto,
+S7-8 aproximado, S9-10 experimentación, S11 entrega final y sustentaciones.
+
+---
+
+## 2. Equipo y reparto
+
+Los dos integrantes deben poder sustentar el proyecto completo: el revisor de un
+bloque teórico lo rederiva solo antes de aprobar.
+
+| Bloque | Principal | Revisor |
+| --- | --- | --- |
+| B0. Contratos, `pyproject.toml`, README | Sebastián López | Dylber Cabrera |
+| B1. Formalización escrita | Dylber Cabrera | Sebastián López |
+| B2. `OraculoContado`, `OraculoSintetico`, fuerza bruta, velocidad real en Colab | Sebastián López | Dylber Cabrera |
+| B3. Reducción NP desde Cobertura Máxima | Sebastián López | Dylber Cabrera |
+| B4. Medición y gráficas (`medir.py`, `graficar.py`, ajuste log-log) | Dylber Cabrera | Sebastián López |
+| B5. Backtracking con cota, sintético y subcatálogo | Sebastián López | Dylber Cabrera |
+| B6. Búsqueda por coordenadas | Dylber Cabrera | Sebastián López |
+| B7. Reparto uniforme frente a UCB1 | Dylber Cabrera | Sebastián López |
+| B8. Experimentación final, validación y `entrega.json` | Los dos | Cruzado |
+| B9. Informe | Sebastián López integra; cada uno redacta lo suyo | Cruzado |
+| B10. Sustentación, demo y simulacros | Los dos | — |
+
+---
+
+## 3. Reglas del equipo
+
+- `main` siempre ejecutable; se integra solo por pull request aprobado por el otro integrante.
+- Ramas cortas: `feat/<bloque>`, `docs/<tema>`, `fix/<tema>`, `exp/<barrido>`.
+- Commits en Conventional Commits, en español, sin emojis y sin pies de herramienta.
+  El mensaje termina en la descripción.
+- `git push` y el borrado de ramas los hace cada integrante manualmente.
+- Código e identificadores en español y `snake_case`. Sin rutas absolutas. Semillas explícitas.
+- Ningún dato inventado: lo que no esté comprobado se marca como inferencia.
+
+### Límites de integridad
+
+- `oraculo.py` **se consulta, no se abre**. No usar `LIMPIA`, `PESADA` ni los
+  comentarios del catálogo. Las opciones se leen imprimiendo `CATALOGO`.
+- No abrir los notebooks de solución del commit `0db1c26` del repositorio base.
+- La configuración ganadora sale de una ejecución reproducible, con su historial guardado.
+
+---
+
+## 4. Entorno técnico
+
+- Python 3.12 con `uv`, `pytest` y `matplotlib`.
+- Modelo real: Colab con GPU T4, modelo `qwen17b`. `oraculo.py` importa `torch` y
+  verificadores desde `/content/open-instruct`, así que **no corre en local**.
+- Pruebas y barridos de tiempo: oráculo sintético en local.
+- Informe: PDF desde LaTeX, en `informe/`. Se compila con `latexmk main.tex`; ver `informe/README.md`.
+
+Datos comprobados del repositorio base:
+
+- 5 ranuras (`rol`, `estrategia`, `formato`, `estilo`, `cierre`) con 8 opciones cada una.
+- `espacio()` da 32 768 configuraciones; con 3 temperaturas, 98 304.
+- `datos_visibles.json`: 100 de búsqueda, 87 de validación, 263 descartadas. El
+  notebook dice 150 y 300, pero está desactualizado.
+- Puntaje todo-o-nada; 2.45 restricciones por instancia en búsqueda.
+- El caché no cobra lo ya generado para (modelo, config, instancia, semilla).
+- El parámetro `presupuesto=` del oráculo es un tope de memoria de GPU, **no es B**.
+- La nota de `entrega.json` sale de un test privado con familias de restricciones
+  que no están en los datos visibles.
+
+---
+
+## 5. Decisiones del proyecto
+
+Se tomaron sin posibilidad de nueva consulta a la docente.
+
+| ID | Decisión | Justificación |
+| --- | --- | --- |
+| **D1** | El repositorio base manda en datos y ejecución; el enunciado, en entregables, pesos y rigor. El informe lleva una tabla de discrepancias. | Es la base indicada y lo único ejecutable. |
+| **D2** | L = 5, k_i = 8, \|C\| = 32 768, n = 100, validación con 87, temperatura 0.0, `qwen17b`, semilla 1. | Valores comprobados; con temperatura 0.0 la generación es determinista. |
+| **D3** | Técnicas: 1 backtracking, 3 coordenadas y 4 uniforme frente a UCB1. UCB1 también es la variante de §4.5. | El enunciado pide 3 de 4. |
+| **D4** | Successive Halving no se implementa; el informe justifica el descarte. | 983 040 consultas por fórmula, 247 808 con tope n = 100 y caché, y con n₀ = 2 casi todo daría 0 %. |
+| **D5** | Cota del exacto: `aciertos + instancias restantes`. Si no alcanza al mejor, se abandona la configuración. | Vale con cualquier oráculo. El peor caso sigue siendo O(\|C\|·n). |
+| **D6** | Las cotas por estructura de reglas solo se usan en el modelo sintético. Con el modelo real no se poda con supuestos. | Una poda no demostrada deja de ser exacta. |
+| **D7** | El modelo sintético mide el exacto con al menos 5 tamaños; el real da los resultados de precisión. | El exacto completo real serían 3 276 800 generaciones. |
+| **D8** | Con el modelo real, el exacto corre en un subcatálogo: 3 mejores opciones por ranura (243 configuraciones) o 2 (32) según la velocidad medida. Se reporta "óptimo del subcatálogo". | Nunca se afirma óptimo global. |
+| **D9** | Reducción desde Cobertura Máxima, versión de decisión, con L y k_i como parte de la entrada; el proyecto es el caso L = 5. | Con L fijo, \|C\| es constante. |
+| **D10** | Dos barridos: n ∈ {10, 25, 50, 75, 100} con \|C\| fijo, y \|C\| = 2^L con n fijo. | T depende de ambas variables. |
+| **D11** | B se fija y se cuenta aquí: generaciones nuevas por (config, instancia, semilla). | El oráculo no limita consultas. |
+| **D12** | `validar` con n = 87 se usa una sola vez, sobre la configuración ya elegida. | Si se elige con validación, deja de ser prueba. |
+
+---
+
+## 6. Algoritmos
+
+**Coordenadas (aproximado principal).** Arranca al azar y mejora una ranura a la vez,
+con el orden guiado por las familias de `violo`. Una pasada cuesta ≤ 40·100 = 4 000
+generaciones; en general T = O(I·L·k_max·n). Se demuestra que la precisión no baja y
+que termina en un óptimo local; un contraejemplo muestra que no hay razón de
+aproximación general. El riesgo de óptimos locales se mide con varios arranques.
+
+**Backtracking (exacto).** Peor caso O(\|C\|·n), comparado con fuerza bruta y midiendo
+nodos y podas. Coincide con D5 a D8.
+
+**Uniforme frente a UCB1.** Los brazos son las configuraciones finalistas; tirar un
+brazo es evaluar una instancia aún no vista para esa configuración. Ambos usan el
+mismo B. La cota de Auer, Cesa-Bianchi y Fischer (2002) supone muestras independientes;
+aquí se muestrea sin reposición, lo que se declara como aproximación.
+
+---
+
+## 7. Estructura del repositorio
+
+```
+ADA2026_2/
+  AGENTS.md, CLAUDE.md, README.md, pyproject.toml
+  oraculo.py, ayudas.py, datos_visibles.json, proyecto_oraculo.ipynb   base, sin cambios
+  busqueda_prompt/        paquete propio; `oraculo` ya es un módulo de la base
+    contratos.py, sintetico.py, contado.py
+    algoritmos/           fuerza_bruta, backtracking, coordenadas, reparto_uniforme, ucb1
+    experimentos/         medir.py, graficar.py
+  tests/
+  resultados/
+  informe/
+  docs/bitacora/
+```
+
+La celda 4 del notebook solo importa y llama a `busqueda_prompt`.
+
+Contratos:
+
+```python
+Config = dict   # {rol, estrategia, formato, estilo, cierre, temperatura}
+
+class Oraculo(Protocol):
+    def evaluar(self, config, instancias, semilla) -> Resultado: ...   # precision, trazas, n
+```
+
+`OraculoContado` envuelve al real o al sintético, cuenta generaciones nuevas sin tocar
+su interior y lanza `PresupuestoAgotado`.
+
+---
+
+## 8. Estado actual del repositorio
+
+- Fase: formalización, sin código. Los archivos del repositorio base aún no están aquí.
+- Primera tarea técnica: medir la velocidad real en Colab, porque define D8 y el
+  número de arranques.
+
+### Pendientes del equipo
+
+- Identificador real del grupo y semana para `entrega.json`; el notebook trae `G07` y `3`.
+- Fechas reales del cronograma.
+- Política de declaración de herramientas de apoyo: por definir.
+
+---
+
+## 9. Mantenimiento de esta guía
+
+- Actualiza la sección 8 al cerrar cada bloque.
+- Una decisión nueva entra en la sección 5 con ID estable y en la bitácora.
