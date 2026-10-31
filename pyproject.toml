@@ -1,0 +1,17 @@
+[project]
+name = "proyecto-oraculo"
+version = "0.1.0"
+description = "Búsqueda de configuraciones de prompt con presupuesto de consultas"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
