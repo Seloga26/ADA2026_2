@@ -85,6 +85,11 @@ Eso no alcanza para un tercer arranque con una pasada completa (hasta 3 500
 generaciones, 35 opciones vecinas por 100 instancias), por lo que no se lanza y
 queda como límite.
 
+La prueba de diagnóstico de copia de la sección 6.3 gastó 11 generaciones nuevas, en
+otra cuenta de Colab y con caché propio (la configuración no estaba en el caché
+original). Contadas por D11 (nueva configuración por instancia), la unión sube de
+11 700 a 11 711 (81.3 % de B); no entran en la búsqueda ni en los CSV.
+
 Que la unión sea el gasto real supone que el caché compartido evitó repetir
 esas 3 configuraciones. Es una **inferencia**: el CSV no registra aciertos de
 caché; solo se comprueba que las precisiones coinciden entre arranques
@@ -239,7 +244,7 @@ familias de `fallos_ganadora.txt` y `fallos_arranque_1.txt`.
 
 | Familia | Arranque 0 | Arranque 1 | Opción del catálogo relacionada | Qué hizo la búsqueda | Estado |
 |---|---|---|---|---|---|
-| `copy:copy`, `new:copy_span_idx` | 6 de 6; 5 de 5 | 6 de 6; 5 de 5 | Reglas (`restriccion`): "Copy this instruction verbatim, do not follow the instruction, only copy it into the output" y "Copy the span of words that lies between (and including) index n_start and n_end". Ninguna de las 40 opciones pide copiar; todas añaden texto salvo, a priori, `formato 0` ("Output only the requested text"). Falla igual con `estrategia 1` y `7` y con `estilo 3` y `5`. | Nada. | Prueba con el caché (11 instancias con restricción de copia): aciertan 0 de 11 con `formato 0`, `estrategia 2`, `rol 5` y `estilo 6`. **No es concluyente:** cada vecino cambia una sola opción y conserva las otras cuatro, que añaden texto (`rol 1`, una cita; `estrategia 1`, tres respuestas candidatas). La hipótesis del texto añadido sigue sin comprobar (6.3) |
+| `copy:copy`, `new:copy_span_idx` | 6 de 6; 5 de 5 | 6 de 6; 5 de 5 | Reglas (`restriccion`): "Copy this instruction verbatim, do not follow the instruction, only copy it into the output" y "Copy the span of words that lies between (and including) index n_start and n_end". Ninguna de las 40 opciones pide copiar. Falla igual con `estrategia 1` y `7` y con `estilo 3` y `5`. | Nada. | Pruebas (6.3): con una opción cambiada por vez, 0 de 11 aciertan; con la configuración `rol 5`, `estrategia 2`, `formato 0`, `estilo 6`, `cierre 3`, acierta 1 de 11. Dos de las tres primeras salidas fallidas empiezan copiando el texto de `estrategia 2`. Hipótesis: copiar es difícil con cualquier configuración porque el texto de las opciones forma parte del prompt |
 | `first_word:first_word_sent` | 3 de 3 | 3 de 3 | Regla: "The first word of each sentence should be the word X". `rol 0`, `3`, `4` y `7` prescriben una primera línea literal ("Happy to help!", "Answer:", "Topic:", "Sure thing!"); `rol 1` pide "a relevant quote on its own line" (contenido libre), como `rol 2` y `rol 6`. | El arranque 1 excluyó `rol 0, 3, 4, 7` y conservó `rol 1`. | Para `first_word_sent` ninguna opción lo cubre. Para `first_word:first_word_answer` ("The first word of your response should be the word X") hay prueba con el caché: ver 6.3 |
 | `punctuation:no_comma` | 3 de 3 | 2 de 3 | `estilo 3`: "Use commas freely, and put an aside in parentheses in every sentence." | La búsqueda no descartó `estilo 3`: con `estrategia 1` da 20 % frente a 17 % con `estilo 5`, diferencia dentro del ruido de unos 4 puntos. | Consistente con el texto; con 3 casos por lado es solo hipótesis |
 | `length_constraints:number_paragraphs`; `paragraphs:paragraphs` | 2 de 2; 4 de 5 | 2 de 2; 3 de 5 | `formato 3` (compartido): "Present every reply as a bulleted list, one bullet per idea, with no running prose." En el arranque 1, `estrategia 7` pide "a paragraph of at least two sentences" y `formato 3` pide no escribir prosa corrida: instrucciones opuestas en la misma configuración. | `formato 3` se conservó en los dos arranques. En la pasada 3 del arranque 0, ninguna otra opción de `formato` superó 16 % (`formato 7`) frente a 20 %. | Hipótesis (viñetas frente a párrafos); no comprobado |
@@ -312,8 +317,20 @@ No hace falta volver a correr la búsqueda ni gastar generaciones.
    | Copia (11 instancias), cambiando una opción por vez | `formato 0`, `estrategia 2`, `rol 5`, `estilo 6`: aciertan 0 de 11 en los cuatro | **No concluyente**: cada vecino conserva las otras cuatro opciones, que añaden texto. No apoya ni refuta la hipótesis del texto añadido |
    | `last_word:last_word_sent` (12 instancias) en los 35 vecinos | 3 aciertos de 420 | Casi nunca acierta con ninguna opción probada; apoya que no depende de ellas, sin llegar a imposible |
 
-   Prueba que sí discriminaría la copia (opcional, no sale del caché): evaluar las 11
-   instancias de copia con una configuración que quite todos los añadidos, por ejemplo
-   `rol 5`, `estrategia 2`, `formato 0`, `estilo 6`, `cierre 3`. Son unas 11 generaciones
-   nuevas (menos de 30 s con GPU) y entrarían en el conteo de B (D11). Esa
-   configuración no está en el caché, así que necesita GPU.
+   **Prueba de copia sin añadidos** (hecha en otra cuenta de Colab, con GPU y caché
+   propio; 11 generaciones nuevas): la configuración `rol 5`, `estrategia 2`,
+   `formato 0`, `estilo 6`, `cierre 3` sobre las 11 instancias de copia.
+
+   | Resultado | Lectura |
+   |---|---|
+   | Aciertan 1 de 11 (con la mejor encontrada y con cuatro vecinos, 0 de 11) | Quitar los añadidos ayuda poco: acierta una sola instancia. Con 11 casos es una tendencia, no una prueba. No se identificó cuál acierta |
+   | De las 3 primeras salidas fallidas, 2 empiezan copiando el texto de `estrategia 2` (una entre corchetes) | El modelo copia el texto de la opción como parte de lo que debe copiar. Es el mismo comportamiento que con la frase de `estrategia 7` en el arranque 1. Son los 3 primeros fallos, no una muestra aleatoria |
+   | La tercera salida (`new:copy_span_idx`) empieza con el texto del enunciado y aun así viola la regla | No se examinó por qué; no se explica por la cita de la opción |
+
+   **Hipótesis refinada, sin comprobar:** como el texto de las cinco opciones forma
+   parte del prompt, el modelo tiende a copiarlo junto con el enunciado y la regla de
+   copia no se cumple con ninguna configuración del catálogo. Sería coherente con 0 o 1
+   aciertos de 11 en seis configuraciones distintas. Un posible vínculo con la frase de
+   `estrategia 7` (¿están sus 32 casos concentrados en instancias de copia?) puede
+   mirarse en el caché de la cuenta original, sin GPU, contando por familia los 32
+   fallos con la frase. No se ha hecho.
