@@ -123,8 +123,10 @@ cada mejor encontrada, 23 comunes. Entre las comunes: `copy:copy` (6 de 6),
 Solo en el arranque 0: `detectable_format:number_bullet_lists`,
 `detectable_format:number_highlighted_sections`, `keywords:frequency` y
 `punctuation:no_comma`. Solo en el arranque 1: `first_word:first_word_answer`,
-`last_word:last_word_sent`, `punctuation:punctuation_dot` y
-`startend:end_checker`.
+`last_word:last_word_sent` y `startend:end_checker`.
+(`punctuation:punctuation_dot` figura como 1 de 1 solo en la tabla del arranque 1,
+pero un ejemplo de `fallos_ganadora.txt`, del arranque 0, también la viola; ver la
+sección 6.)
 
 **Primera restricción violada (`violo`), top de cada mejor encontrada:**
 
@@ -163,9 +165,10 @@ analysing that part."
   El criterio de 300 caracteres es laxo (una frase en el carácter 280 cuenta
   igual). Que el modelo copie la instrucción en vez de cumplirla es una
   **hipótesis**.
-- **Coincidencia sin comprobar:** el texto de `estilo 5` pide "never end a line
-  with a period", y uno de los 3 ejemplos del arranque 1 viola
-  `punctuation:punctuation_dot`. No se sabe qué verifica esa familia.
+- **Sin base para `estilo 5` y `punctuation_dot`:** el texto de `estilo 5` pide
+  "never end a line with a period", pero el arranque 0 (que usa `estilo 3`)
+  también tiene un ejemplo que viola `punctuation:punctuation_dot`. No se sabe
+  qué verifica esa familia; no se afirma ninguna relación (sección 6).
 
 Textos de las opciones, leídos de `CATALOGO` (la celda los recorta a 90
 caracteres; `estrategia 7` y `estilo 5` se leyeron completos con `texto_opcion`):
@@ -211,3 +214,67 @@ caracteres; `estrategia 7` y `estilo 5` se leyeron completos con `texto_opcion`)
   las precisiones de la pasada 2 repiten las de la pasada 1 en `estilo` y
   `estrategia`, lo que **sugiere** lecturas de caché; no está registrado.
 - Solo dos arranques; el subcatálogo (D8) no entra en esta entrega (D17).
+
+## 6. Fallos, opciones y decisiones de la búsqueda (D6)
+
+Esta sección enlaza las familias que fallan con las opciones del catálogo y con lo
+que hizo la búsqueda. Cada fila dice qué está **comprobado** (cifras de los `.txt`,
+de `historial_arranque_*.csv` y textos leídos de `CATALOGO`) y qué es **hipótesis**.
+No hay datos por familia de las otras 115 configuraciones evaluadas, solo de las
+dos mejores encontradas; por eso ninguna fila demuestra que una opción cause un fallo.
+
+### 6.1 Familias citadas
+
+Arranque 0: `estrategia 1`, `estilo 3`. Arranque 1: `estrategia 7`, `estilo 5`.
+Comparten `rol 1`, `formato 3` y `cierre 3`. Los números salen de las tablas de
+familias de `fallos_ganadora.txt` y `fallos_arranque_1.txt`.
+
+| Familia | Arranque 0 | Arranque 1 | Opción del catálogo relacionada | Qué hizo la búsqueda | Estado |
+|---|---|---|---|---|---|
+| `copy:copy`, `new:copy_span_idx` | 6 de 6; 5 de 5 | 6 de 6; 5 de 5 | Ninguna de las opciones leídas habla de copiar. Falla igual con `estrategia 1` y `7` y con `estilo 3` y `5`, así que no depende de esas cuatro opciones; solo queda lo compartido (`rol 1`, `formato 3`, `cierre 3`) o el modelo. | Nada: no hay dato por familia de otras configuraciones. | Deducción; no comprobado |
+| `first_word:first_word_sent` | 3 de 3 | 3 de 3 | `rol 1` (texto recortado): "Open every reply with a relevant quote on its own line, the…". | El arranque 1 excluyó `rol 0, 3, 4, 7` por la hipótesis de que fijan la primera línea y chocan con `first_word`. `rol 1` también abre con una línea fija y se conservó. | Hipótesis; falta leer el texto completo de las opciones de `rol` |
+| `punctuation:no_comma` | 3 de 3 | 2 de 3 | `estilo 3`: "Use commas freely, and put an aside in parentheses in every sentence." | La búsqueda no descartó `estilo 3`: con `estrategia 1` da 20 % frente a 17 % con `estilo 5`, diferencia dentro del ruido de unos 4 puntos. | Consistente con el texto; con 3 casos por lado es solo hipótesis |
+| `length_constraints:number_paragraphs`; `paragraphs:paragraphs` | 2 de 2; 4 de 5 | 2 de 2; 3 de 5 | `formato 3` (compartido): "Present every reply as a bulleted list, one bullet per idea, with no running prose." | `formato 3` se conservó en los dos arranques. En la pasada 3 del arranque 0, ninguna otra opción de `formato` superó 16 % (`formato 7`) frente a 20 %. | Hipótesis (viñetas frente a párrafos); no comprobado |
+| `last_word:last_word_sent` | 3 de 4 | 4 de 4 | Ninguna opción leída lo explica. Es la primera restricción violada más frecuente en las dos (8 casos). | Nada. | No comprobado |
+| Frase "Before each part of the answer…" (no es una familia) | 0 de 80 fallos | 32 de 83 | `estrategia 7` contiene la frase literalmente (comprobado con `CATALOGO`). | El arranque 0 descartó `estrategia 7` (11 % en su contexto final); el arranque 1 la eligió junto con `estilo 5` (17 %). | Origen comprobado; que cause fallos, no |
+| `punctuation:punctuation_dot` | no figura en su tabla | 1 de 1 | `estilo 5` pide no terminar líneas con punto, pero el arranque 0 (`estilo 3`) también tiene un ejemplo que la viola. | Nada. | Inconsistencia sin resolver entre la tabla y los ejemplos de `fallos_ganadora.txt`; no se afirma nada |
+
+Con 3 a 5 casos por familia, las diferencias entre arranques (por ejemplo 3 de 4
+frente a 4 de 4) no se distinguen del ruido de la medición.
+
+### 6.2 Qué cambió en la búsqueda a partir de las trazas
+
+El arranque 1 se lanzó con las trazas del arranque 0 y recortó el espacio:
+
+| Ranura | Opciones excluidas | Motivo escrito en `decide` | Su precisión en el contexto final del arranque 0 (pasada 3) |
+|---|---|---|---|
+| `rol` | 0, 3, 4, 7 | "fijan la primera línea y chocan con first_word" (hipótesis) | 0.06, 0.08, 0.08, 0.09 |
+| `formato` | 1, 4, 5 | "nunca pasaron de 10 %" | 0.10, 0.07, 0.07 |
+| `estrategia` | 3 | "nunca pasó de 10 %" | 0.15 |
+| `cierre` | todas menos la 3 | "la 3 es la única que no agrega texto al final" (hipótesis) | de 0.06 a 0.13 |
+
+Con estas exclusiones, el arranque 1 buscó en 4 · 5 · 7 · 8 · 1 = 1 120 de las
+32 768 configuraciones (3.4 %). El contexto final del arranque 0 es `rol 1`,
+`estrategia 1`, `formato 3`, `estilo 3`, `cierre 3` (0.20).
+
+- **Las exclusiones no habrían cambiado la mejor del arranque 0:** en ese contexto,
+  ninguna opción excluida superó 0.15, frente a 0.20. Eso solo vale en ese contexto;
+  con otras combinaciones no se midió.
+- **Una premisa no se sostuvo:** `estrategia 3` "nunca pasó de 10 %" era cierto con
+  las pasadas 1 y 2 del arranque 0 (0.06 y 0.10), pero en la pasada 3 llegó a 0.15.
+  No cambia la ganadora, y esa pasada es posterior al lanzamiento del arranque 1.
+- **Interacción:** el arranque 0 descartó `estrategia 7` (0.11 con `estilo 3`) y el
+  arranque 1 la eligió (0.17 con `estilo 5`). Es la misma interacción de la sección 3.
+
+### 6.3 Qué falta para comprobar el resto
+
+No hace falta volver a correr la búsqueda ni gastar generaciones.
+
+1. Leer el texto completo de las 40 opciones imprimiendo `CATALOGO` en Colab
+   (AGENTS.md permite consultarlo así; no se abre `oraculo.py`). Con eso se pueden
+   citar `rol 1` entero, las opciones excluidas y las que no se han leído.
+2. Opcional, desde el caché: comparar las familias que fallan en configuraciones ya
+   evaluadas que cambian una sola opción. Solo es gratis si esas configuraciones
+   están en el caché de Drive de esa sesión.
+3. Aclarar qué cuenta la tabla de familias de `fallos_*.txt` (falta
+   `punctuation_dot` en la del arranque 0, aunque un ejemplo la viola).
