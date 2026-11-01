@@ -19,37 +19,38 @@ COLUMNAS = ("paso", "arranque", "ranura", "opcion", "config", "precision",
 
 
 class _Registro:  # clase auxiliar; el "_" inicial indica que es de uso interno del módulo
-    """Guarda cada paso en memoria y, si hay ruta, en CSV (se vacía en cada fila)."""
+    """Guarda cada paso en memoria y, si hay ruta, en CSV (abre y cierra el archivo en cada fila)."""
 
     def __init__(self, ruta, filas, mostrar=None):  # constructor: se ejecuta al crear _Registro(...)
         self.filas = filas  # lista compartida con quien llama; aquí se van agregando las filas
         self.mostrar = mostrar  # función opcional (p. ej. print) que recibe cada fila para verla en pantalla
+        self.ruta = ruta  # ruta del CSV, o None si solo se quiere registro en memoria
         self.paso = 0  # contador del número de paso; sube 1 en cada anotación
-        self._archivo = None  # por defecto no hay archivo abierto (solo registro en memoria)
-        if ruta:  # solo si el usuario pidió guardar en un CSV
-            # Es archivo nuevo si no existe o está vacío; "or" corta: si no existe, no llama a getsize.
-            nuevo = not os.path.exists(ruta) or os.path.getsize(ruta) == 0
-            # "a" = append: agrega al final sin borrar lo previo (así se reanuda tras una desconexión);
-            # newline="" evita filas en blanco en Windows; utf-8 fija la codificación.
-            self._archivo = open(ruta, "a", newline="", encoding="utf-8")
+
+    def _escribir(self, fila):  # agrega una fila al CSV abriendo y cerrando el archivo
+        # Es archivo nuevo si no existe o está vacío; "or" corta: si no existe, no llama a getsize.
+        nuevo = not os.path.exists(self.ruta) or os.path.getsize(self.ruta) == 0
+        # "a" = append: agrega al final sin borrar lo previo; newline="" evita filas en blanco en Windows.
+        # El "with" cierra el archivo al salir del bloque: así Drive lo sincroniza en cada fila y,
+        # si Colab se cae, el historial ya quedó guardado.
+        with open(self.ruta, "a", newline="", encoding="utf-8") as archivo:
             # DictWriter escribe diccionarios como filas, ordenando las columnas según fieldnames.
-            self._csv = csv.DictWriter(self._archivo, fieldnames=COLUMNAS)
+            escritor = csv.DictWriter(archivo, fieldnames=COLUMNAS)
             if nuevo:  # si el archivo es nuevo hace falta la fila de encabezados
-                self._csv.writeheader()  # escribe los nombres de columna una sola vez
+                escritor.writeheader()  # escribe los nombres de columna una sola vez
+            escritor.writerow(fila)  # escribe la fila como una línea del CSV
 
     def anotar(self, **campos):  # **campos recoge los argumentos con nombre en un diccionario
         self.paso += 1  # avanza el contador antes de usarlo, así el primer paso es el 1
         fila = {"paso": self.paso, **campos}  # nuevo diccionario: "paso" más todos los campos recibidos (** desempaqueta)
         self.filas.append(fila)  # guarda la fila en la lista en memoria
-        if self._archivo:  # si hay CSV abierto, también se escribe allí
-            self._csv.writerow(fila)  # escribe la fila como una línea del CSV
-            self._archivo.flush()  # fuerza el volcado a disco ya: si Colab se cae, no se pierde el historial
+        if self.ruta:  # si se pidió CSV, también se escribe allí
+            self._escribir(fila)
         if self.mostrar:  # si hay función de visualización
             self.mostrar(fila)  # la llama con la fila (p. ej. imprime el progreso)
 
-    def cerrar(self):  # libera el archivo al terminar
-        if self._archivo:  # solo si se abrió alguno
-            self._archivo.close()  # cierra el archivo y asegura que todo quedó escrito
+    def cerrar(self):  # se conserva por compatibilidad: ya no queda ningún archivo abierto
+        pass  # cada fila cerró su archivo al escribirse
 
 
 def resolver(oraculo, ranuras, opciones, instancias, semilla=1, presupuesto=None,
