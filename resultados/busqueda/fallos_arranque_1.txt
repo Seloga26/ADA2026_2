@@ -1,0 +1,72 @@
+Fallos: 83 de 100
+copy:copy                                                 6 fallos de   6
+new:copy_span_idx                                         5 fallos de   5
+last_word:last_word_sent                                  4 fallos de   4
+change_case:capital_word_frequency                        4 fallos de   4
+change_case:english_capital                               4 fallos de   5
+letters:letter_counting2                                  3 fallos de   3
+paragraphs:paragraphs                                     3 fallos de   5
+keywords:existence                                        3 fallos de   4
+keywords:keyword_specific_position                        3 fallos de   3
+first_word:first_word_sent                                3 fallos de   3
+first_word:first_word_answer                              3 fallos de   3
+keywords:start_end                                        3 fallos de   3
+copy:copying_multiple                                     2 fallos de   2
+keywords:forbidden_words                                  2 fallos de   3
+language:response_language                                2 fallos de   2
+keywords:word_once                                        2 fallos de   2
+length_constraints:number_paragraphs                      2 fallos de   2
+copy:repeat_phrase                                        2 fallos de   2
+punctuation:no_comma                                      2 fallos de   3
+last_word:last_word_answer                                2 fallos de   4
+detectable_format:sentence_hyphens                        2 fallos de   2
+detectable_format:constrained_response                    2 fallos de   3
+detectable_format:title                                   2 fallos de   2
+startend:quotation                                        1 fallos de   2
+keywords:letter_frequency                                 1 fallos de   1
+length_constraints:number_words                           1 fallos de   1
+detectable_format:square_brackets                         1 fallos de   1
+letters:letter_counting                                   1 fallos de   1
+punctuation:punctuation_dot                               1 fallos de   1
+detectable_format:json_format                             1 fallos de   1
+detectable_format:bigram_wrapping                         1 fallos de   1
+detectable_format:number_highlighted_sections             1 fallos de   2
+combination:repeat_prompt                                 1 fallos de   1
+startend:end_checker                                      1 fallos de   1
+detectable_format:multiple_sections                       1 fallos de   2
+keywords:word_count_different_numbers                     1 fallos de   2
+punctuation:punctuation_exclamation                       1 fallos de   2
+length_constraints:nth_paragraph_first_word               1 fallos de   1
+length_constraints:number_sentences                       1 fallos de   1
+change_case:english_lowercase                             1 fallos de   2
+
+Primera restricción violada (campo violo), top 10:
+  8  last_word:last_word_sent
+  6  copy:copy
+  5  new:copy_span_idx
+  4  keywords:word_once
+  4  detectable_format:square_brackets
+  4  keywords:keyword_specific_position
+  4  first_word:first_word_sent
+  4  change_case:capital_word_frequency
+  4  keywords:start_end
+  4  change_case:english_capital
+
+Ejemplos de salida fallida:
+violó: letters:letter_counting2
+<<The Art of Being>>
+
+Before each part of the answer, write a paragraph of at least two sentences analysing that part.
+
+The art of being is about embracing the present moment with open arms, allowing each experience to shape your inner world. It's about finding joy in the small things and learning f
+------------------------------------------------------------
+violó: punctuation:punctuation_dot
+Before each part of the answer, write a paragraph of at least two sentences analysing that part.
+
+The first paragraph will cover the function's structure and the key components of the analysis. The function will calculate the average completion percentage of all projects, the average completion perc
+------------------------------------------------------------
+violó: startend:quotation
+"Before each part of the answer, write a paragraph of at least two sentences analysing that part.
+
+The stranger's story is filled with emotional depth and personal connection, making each encounter with the listeners meaningful and impactful. The structure of the story, with the number of days in ea
+------------------------------------------------------------
