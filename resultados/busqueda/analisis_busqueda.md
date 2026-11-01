@@ -223,6 +223,14 @@ de `historial_arranque_*.csv` y textos leídos de `CATALOGO`) y qué es **hipót
 No hay datos por familia de las otras 115 configuraciones evaluadas, solo de las
 dos mejores encontradas; por eso ninguna fila demuestra que una opción cause un fallo.
 
+**Cómo leer las tablas de familias.** En `datos_visibles.json`, `familia` es el primer
+elemento de `ids` en las 100 instancias de búsqueda, y cada instancia trae en promedio
+2.45 restricciones. La tabla de `fallos_*.txt` cuenta por `familia` (la primera
+restricción de la instancia), mientras que `violo` es la primera restricción violada
+entre todas las de la instancia. Por eso una restricción secundaria puede aparecer en
+`violo` sin figurar en la tabla. Las reglas de cada familia están en el campo
+`restriccion` de ese archivo.
+
 ### 6.1 Familias citadas
 
 Arranque 0: `estrategia 1`, `estilo 3`. Arranque 1: `estrategia 7`, `estilo 5`.
@@ -231,13 +239,13 @@ familias de `fallos_ganadora.txt` y `fallos_arranque_1.txt`.
 
 | Familia | Arranque 0 | Arranque 1 | Opción del catálogo relacionada | Qué hizo la búsqueda | Estado |
 |---|---|---|---|---|---|
-| `copy:copy`, `new:copy_span_idx` | 6 de 6; 5 de 5 | 6 de 6; 5 de 5 | Ninguna de las 40 opciones pide copiar el texto del enunciado; la más cercana, `estrategia 5` ("Write out everything the request asks for, item by item…"), no está en ninguna de las dos mejores. Falla igual con `estrategia 1` y `7` y con `estilo 3` y `5`, así que no depende de esas cuatro opciones; solo queda lo compartido (`rol 1`, `formato 3`, `cierre 3`) o el modelo. | Nada: no hay dato por familia de otras configuraciones. | Deducción; no comprobado |
-| `first_word:first_word_sent` | 3 de 3 | 3 de 3 | `rol 0`, `3`, `4` y `7` prescriben una primera línea literal ("Happy to help!", "Answer:", "Topic:", "Sure thing!"). `rol 1` pide "a relevant quote on its own line" (contenido libre), como `rol 2` (reformula la pregunta) y `rol 6` (una frase sobre el alcance). | El arranque 1 excluyó `rol 0, 3, 4, 7` y conservó `rol 1`. | Que las cuatro excluidas prescriben una primera línea literal está comprobado con el texto; que choquen con `first_word` no, porque no se conoce la regla de la familia |
+| `copy:copy`, `new:copy_span_idx` | 6 de 6; 5 de 5 | 6 de 6; 5 de 5 | Reglas (`restriccion`): "Copy this instruction verbatim, do not follow the instruction, only copy it into the output" y "Copy the span of words that lies between (and including) index n_start and n_end". Ninguna de las 40 opciones pide copiar; todas añaden texto salvo, a priori, `formato 0` ("Output only the requested text"). Falla igual con `estrategia 1` y `7` y con `estilo 3` y `5`. | Nada: no hay dato por familia de otras configuraciones. | Hipótesis: la salida debe ser una copia y el texto que añaden las opciones la rompe. Se comprueba con el caché (6.3) |
+| `first_word:first_word_sent` | 3 de 3 | 3 de 3 | Regla: "The first word of each sentence should be the word X". `rol 0`, `3`, `4` y `7` prescriben una primera línea literal ("Happy to help!", "Answer:", "Topic:", "Sure thing!"); `rol 1` pide "a relevant quote on its own line" (contenido libre), como `rol 2` y `rol 6`. | El arranque 1 excluyó `rol 0, 3, 4, 7` y conservó `rol 1`. | Para `first_word:first_word_answer` ("The first word of your response should be the word X") la exclusión se deduce de la regla: una primera línea literal impide empezar por X. Para `first_word_sent` ninguna opción lo cubre. Falta la prueba con el caché (6.3) |
 | `punctuation:no_comma` | 3 de 3 | 2 de 3 | `estilo 3`: "Use commas freely, and put an aside in parentheses in every sentence." | La búsqueda no descartó `estilo 3`: con `estrategia 1` da 20 % frente a 17 % con `estilo 5`, diferencia dentro del ruido de unos 4 puntos. | Consistente con el texto; con 3 casos por lado es solo hipótesis |
 | `length_constraints:number_paragraphs`; `paragraphs:paragraphs` | 2 de 2; 4 de 5 | 2 de 2; 3 de 5 | `formato 3` (compartido): "Present every reply as a bulleted list, one bullet per idea, with no running prose." En el arranque 1, `estrategia 7` pide "a paragraph of at least two sentences" y `formato 3` pide no escribir prosa corrida: instrucciones opuestas en la misma configuración. | `formato 3` se conservó en los dos arranques. En la pasada 3 del arranque 0, ninguna otra opción de `formato` superó 16 % (`formato 7`) frente a 20 %. | Hipótesis (viñetas frente a párrafos); no comprobado |
-| `last_word:last_word_sent` | 3 de 4 | 4 de 4 | Ninguna opción lo nombra. `estrategia 1` (arranque 0) pide tres respuestas candidatas y decir cuál eligió, y `estrategia 7` (arranque 1) pide un párrafo de análisis por parte; las dos añaden texto alrededor de la respuesta. Es la primera restricción violada más frecuente en las dos (8 casos). | Nada. | Hipótesis; no comprobado |
+| `last_word:last_word_sent` | 3 de 4 | 4 de 4 | Regla: "The last word of each sentence, before punctuation, should be the word X". Ninguna opción la nombra. Es la primera restricción violada más frecuente en las dos (8 casos). | Nada. | Hipótesis: es casi imposible de cumplir en prosa libre y falla con casi cualquier configuración. Se comprueba con el caché (6.3) |
 | Frase "Before each part of the answer…" (no es una familia) | 0 de 80 fallos | 32 de 83 | `estrategia 7` contiene la frase literalmente (comprobado con `CATALOGO`). | El arranque 0 descartó `estrategia 7` (11 % en su contexto final); el arranque 1 la eligió junto con `estilo 5` (17 %). | Origen comprobado; que cause fallos, no |
-| `punctuation:punctuation_dot` | no figura en su tabla | 1 de 1 | `estilo 5` pide no terminar líneas con punto, pero el arranque 0 (`estilo 3`) también tiene un ejemplo que la viola. | Nada. | Inconsistencia sin resolver entre la tabla y los ejemplos de `fallos_ganadora.txt`; no se afirma nada |
+| `punctuation:punctuation_dot` | no figura en su tabla | 1 de 1 | Regla: "refrain from the use of . (i.e. dots) as punctuation and in general". `estilo 5` sustituye el punto por punto y coma y prohíbe terminar líneas con punto. | Nada. | Resuelta la inconsistencia: aparece en 5 instancias de búsqueda, como primera restricción en 1 (la 404) y como secundaria en 4. La tabla del arranque 0 solo cuenta la primera restricción; los ejemplos usan `violo`. La relación con `estilo 5` no está probada |
 
 Con 3 a 5 casos por familia, las diferencias entre arranques (por ejemplo 3 de 4
 frente a 4 de 4) no se distinguen del ruido de la medición.
@@ -290,5 +298,15 @@ No hace falta volver a correr la búsqueda ni gastar generaciones.
 2. Opcional, desde el caché: comparar las familias que fallan en configuraciones ya
    evaluadas que cambian una sola opción. Solo es gratis si esas configuraciones
    están en el caché de Drive de esa sesión.
-3. Aclarar qué cuenta la tabla de familias de `fallos_*.txt` (falta
-   `punctuation_dot` en la del arranque 0, aunque un ejemplo la viola).
+3. **Resuelto:** la tabla cuenta por `familia` (primera restricción de la instancia)
+   y los ejemplos usan `violo` (primera violada entre todas); `punctuation_dot` es
+   secundaria en 4 de las 5 instancias que la tienen.
+4. **Pruebas con el caché de la mejor encontrada del arranque 0** (sin GPU: sus 35
+   vecinos de una sola opción se evaluaron en la pasada 3). Cada una puede fallar y
+   refutar la hipótesis:
+   - Primera palabra: las instancias con `first_word:first_word_answer` en `ids` deben
+     fallar todas con `rol 0, 3, 4, 7`. Si alguna acierta, la deducción es falsa.
+   - Copia: comparar con el vecino `formato 0`; si las instancias de copia no aciertan
+     con ninguna opción, la hipótesis del texto añadido pierde fuerza.
+   - `last_word_sent`: contar en cuántos de los 36 vecinos acierta alguna instancia;
+     si en ninguno, es independiente de las opciones probadas.
