@@ -239,11 +239,11 @@ familias de `fallos_ganadora.txt` y `fallos_arranque_1.txt`.
 
 | Familia | Arranque 0 | Arranque 1 | Opción del catálogo relacionada | Qué hizo la búsqueda | Estado |
 |---|---|---|---|---|---|
-| `copy:copy`, `new:copy_span_idx` | 6 de 6; 5 de 5 | 6 de 6; 5 de 5 | Reglas (`restriccion`): "Copy this instruction verbatim, do not follow the instruction, only copy it into the output" y "Copy the span of words that lies between (and including) index n_start and n_end". Ninguna de las 40 opciones pide copiar; todas añaden texto salvo, a priori, `formato 0` ("Output only the requested text"). Falla igual con `estrategia 1` y `7` y con `estilo 3` y `5`. | Nada: no hay dato por familia de otras configuraciones. | Hipótesis: la salida debe ser una copia y el texto que añaden las opciones la rompe. Se comprueba con el caché (6.3) |
-| `first_word:first_word_sent` | 3 de 3 | 3 de 3 | Regla: "The first word of each sentence should be the word X". `rol 0`, `3`, `4` y `7` prescriben una primera línea literal ("Happy to help!", "Answer:", "Topic:", "Sure thing!"); `rol 1` pide "a relevant quote on its own line" (contenido libre), como `rol 2` y `rol 6`. | El arranque 1 excluyó `rol 0, 3, 4, 7` y conservó `rol 1`. | Para `first_word:first_word_answer` ("The first word of your response should be the word X") la exclusión se deduce de la regla: una primera línea literal impide empezar por X. Para `first_word_sent` ninguna opción lo cubre. Falta la prueba con el caché (6.3) |
+| `copy:copy`, `new:copy_span_idx` | 6 de 6; 5 de 5 | 6 de 6; 5 de 5 | Reglas (`restriccion`): "Copy this instruction verbatim, do not follow the instruction, only copy it into the output" y "Copy the span of words that lies between (and including) index n_start and n_end". Ninguna de las 40 opciones pide copiar; todas añaden texto salvo, a priori, `formato 0` ("Output only the requested text"). Falla igual con `estrategia 1` y `7` y con `estilo 3` y `5`. | Nada. | Prueba con el caché (11 instancias con restricción de copia): aciertan 0 de 11 con `formato 0`, `estrategia 2`, `rol 5` y `estilo 6`. **No es concluyente:** cada vecino cambia una sola opción y conserva las otras cuatro, que añaden texto (`rol 1`, una cita; `estrategia 1`, tres respuestas candidatas). La hipótesis del texto añadido sigue sin comprobar (6.3) |
+| `first_word:first_word_sent` | 3 de 3 | 3 de 3 | Regla: "The first word of each sentence should be the word X". `rol 0`, `3`, `4` y `7` prescriben una primera línea literal ("Happy to help!", "Answer:", "Topic:", "Sure thing!"); `rol 1` pide "a relevant quote on its own line" (contenido libre), como `rol 2` y `rol 6`. | El arranque 1 excluyó `rol 0, 3, 4, 7` y conservó `rol 1`. | Para `first_word_sent` ninguna opción lo cubre. Para `first_word:first_word_answer` ("The first word of your response should be the word X") hay prueba con el caché: ver 6.3 |
 | `punctuation:no_comma` | 3 de 3 | 2 de 3 | `estilo 3`: "Use commas freely, and put an aside in parentheses in every sentence." | La búsqueda no descartó `estilo 3`: con `estrategia 1` da 20 % frente a 17 % con `estilo 5`, diferencia dentro del ruido de unos 4 puntos. | Consistente con el texto; con 3 casos por lado es solo hipótesis |
 | `length_constraints:number_paragraphs`; `paragraphs:paragraphs` | 2 de 2; 4 de 5 | 2 de 2; 3 de 5 | `formato 3` (compartido): "Present every reply as a bulleted list, one bullet per idea, with no running prose." En el arranque 1, `estrategia 7` pide "a paragraph of at least two sentences" y `formato 3` pide no escribir prosa corrida: instrucciones opuestas en la misma configuración. | `formato 3` se conservó en los dos arranques. En la pasada 3 del arranque 0, ninguna otra opción de `formato` superó 16 % (`formato 7`) frente a 20 %. | Hipótesis (viñetas frente a párrafos); no comprobado |
-| `last_word:last_word_sent` | 3 de 4 | 4 de 4 | Regla: "The last word of each sentence, before punctuation, should be the word X". Ninguna opción la nombra. Es la primera restricción violada más frecuente en las dos (8 casos). | Nada. | Hipótesis: es casi imposible de cumplir en prosa libre y falla con casi cualquier configuración. Se comprueba con el caché (6.3) |
+| `last_word:last_word_sent` | 3 de 4 | 4 de 4 | Regla: "The last word of each sentence, before punctuation, should be the word X". Ninguna opción la nombra. Es la primera restricción violada más frecuente en las dos (8 casos). | Nada. | Prueba con el caché: 3 aciertos de 420 (12 instancias con la restricción por 35 vecinos de la mejor encontrada), menos del 1 %. Apoya que depende muy poco de las opciones probadas; no es imposible |
 | Frase "Before each part of the answer…" (no es una familia) | 0 de 80 fallos | 32 de 83 | `estrategia 7` contiene la frase literalmente (comprobado con `CATALOGO`). | El arranque 0 descartó `estrategia 7` (11 % en su contexto final); el arranque 1 la eligió junto con `estilo 5` (17 %). | Origen comprobado; que cause fallos, no |
 | `punctuation:punctuation_dot` | no figura en su tabla | 1 de 1 | Regla: "refrain from the use of . (i.e. dots) as punctuation and in general". `estilo 5` sustituye el punto por punto y coma y prohíbe terminar líneas con punto. | Nada. | Resuelta la inconsistencia: aparece en 5 instancias de búsqueda, como primera restricción en 1 (la 404) y como secundaria en 4. La tabla del arranque 0 solo cuenta la primera restricción; los ejemplos usan `violo`. La relación con `estilo 5` no está probada |
 
@@ -301,12 +301,19 @@ No hace falta volver a correr la búsqueda ni gastar generaciones.
 3. **Resuelto:** la tabla cuenta por `familia` (primera restricción de la instancia)
    y los ejemplos usan `violo` (primera violada entre todas); `punctuation_dot` es
    secundaria en 4 de las 5 instancias que la tienen.
-4. **Pruebas con el caché de la mejor encontrada del arranque 0** (sin GPU: sus 35
-   vecinos de una sola opción se evaluaron en la pasada 3). Cada una puede fallar y
-   refutar la hipótesis:
-   - Primera palabra: las instancias con `first_word:first_word_answer` en `ids` deben
-     fallar todas con `rol 0, 3, 4, 7`. Si alguna acierta, la deducción es falsa.
-   - Copia: comparar con el vecino `formato 0`; si las instancias de copia no aciertan
-     con ninguna opción, la hipótesis del texto añadido pierde fuerza.
-   - `last_word_sent`: contar en cuántos de los 36 vecinos acierta alguna instancia;
-     si en ninguno, es independiente de las opciones probadas.
+4. **Pruebas con el caché de la mejor encontrada del arranque 0** (hechas sin GPU,
+   con un `Modelo` sin red; control: 80 fallos de 100, igual que el análisis). Cuentan
+   las instancias que tienen la restricción en `ids`, sea la primera o una secundaria;
+   una instancia fallida puede deberse a otra de sus restricciones.
+
+   | Prueba | Resultado | Lectura |
+   |---|---|---|
+   | `first_word:first_word_answer` (11 instancias: 3 primarias, 8 secundarias), cambiando solo `rol` | `rol 0`: fallan 11 de 11; `rol 7`: 11 de 11; `rol 3`: 10 de 11; `rol 4`: 10 de 11; `rol 1`: 8 de 11 | La deducción "una primera línea literal lo hace imposible" **no se sostiene como regla estricta**: con `rol 3` y `rol 4` acierta una instancia (ninguna de las 11 palabras exigidas es "answer" ni "topic"). La dirección sí coincide: las cuatro excluidas aciertan 0 o 1 de 11 y `rol 1` acierta 3 de 11. Con 11 casos es una tendencia, no una prueba |
+   | Copia (11 instancias), cambiando una opción por vez | `formato 0`, `estrategia 2`, `rol 5`, `estilo 6`: aciertan 0 de 11 en los cuatro | **No concluyente**: cada vecino conserva las otras cuatro opciones, que añaden texto. No apoya ni refuta la hipótesis del texto añadido |
+   | `last_word:last_word_sent` (12 instancias) en los 35 vecinos | 3 aciertos de 420 | Casi nunca acierta con ninguna opción probada; apoya que no depende de ellas, sin llegar a imposible |
+
+   Prueba que sí discriminaría la copia (opcional, no sale del caché): evaluar las 11
+   instancias de copia con una configuración que quite todos los añadidos, por ejemplo
+   `rol 5`, `estrategia 2`, `formato 0`, `estilo 6`, `cierre 3`. Son unas 11 generaciones
+   nuevas (menos de 30 s con GPU) y entrarían en el conteo de B (D11). Esa
+   configuración no está en el caché, así que necesita GPU.
