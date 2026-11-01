@@ -1,0 +1,13 @@
+{
+ "arranque": 0,
+ "config": {
+  "rol": 1,
+  "estrategia": 1,
+  "formato": 3,
+  "estilo": 3,
+  "cierre": 3,
+  "temperatura": 0.0
+ },
+ "precision": 0.2,
+ "consultas": 9200
+}
