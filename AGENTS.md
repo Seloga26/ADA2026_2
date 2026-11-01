@@ -191,7 +191,7 @@ su interior y lanza `PresupuestoAgotado`.
 
 ## 8. Estado actual del repositorio
 
-Última actualización: sábado 2026-10-31, 17:00. Antes de seguir, ejecuta `git fetch origin`,
+Última actualización: domingo 2026-11-01 (la hora no quedó anotada). Antes de seguir, ejecuta `git fetch origin`,
 `git log origin/main --oneline -5` y `git branch -r`: Dylber pudo haber subido trabajo.
 
 **Entrega:** lunes 2026-11-02 a medianoche (se asume 23:59). Corte de trabajo nuevo: lunes 20:00.
@@ -207,6 +207,13 @@ Qué hace cada uno y qué bloquea a quién: `docs/reparto_primera_entrega.md`.
 | S7 y S8: reducción y muestreo | Redactado | `informe/secciones/02_reduccion.tex`; compila |
 | S9: notebook de evaluación | Sin probar en Colab | Solo probado con modelo y oráculo simulados |
 | S12: README | Listo | El ejemplo da el resultado esperado |
+| D5: búsqueda real | Listo | Dos arranques convergidos; unión de 117 configuraciones y 11 700 generaciones de B = 14 400 (`resultados/busqueda/`, `resumir.py`) |
+| D6: análisis de fallos | Redactado | `resultados/busqueda/analisis_busqueda.md`, sección 6, con los 40 textos de `CATALOGO` en `catalogo_opciones.txt`; los vínculos opción-fallo siguen como hipótesis |
+| D7: `notebooks/busqueda.ipynb` | Selector único pendiente de PR | Commit `6615783` en `exp/resultados-3pasadas`; sin probar en Colab |
+
+**Mejor encontrada hasta ahora (D8 sin congelar):** rol 1, estrategia 1, formato 3, estilo 3,
+cierre 3, temperatura 0.0; 20 % en las 100 instancias de búsqueda. Es la del arranque 0, que
+paró por convergencia en su pasada 3. No es un óptimo global ni del subcatálogo.
 
 ### Pendiente de Sebastián
 
@@ -223,14 +230,17 @@ Qué hace cada uno y qué bloquea a quién: `docs/reparto_primera_entrega.md`.
 
 ### Pendiente de Dylber
 
-Al cierre de esta actualización no había subido nada y faltaba confirmar su acceso al repositorio.
-
-1. D2: formalización. D3: `busqueda_prompt/algoritmos/coordenadas.py`, con `OraculoContado` y
-   la forma de `fuerza_bruta.resolver`.
-2. D4: primer arranque el sábado, con caché en Drive.
-3. D5 a D9: búsqueda, análisis de fallos, notebook, configuración congelada el domingo por la
-   noche, `oraculo.validar` una vez y `entrega.json`.
-4. D10 y D11: secciones 04 y 06 del informe y `docs/manual_tecnico.md`.
+1. D8: congelar la configuración del arranque 0 y anotar commit y hora.
+2. D7: integrar el PR del selector único y probar la celda de parámetros en Colab con
+   `ARRANQUE = 0` y `1`.
+3. D6: las pruebas con el caché ya se hicieron (sección 6.3 de `analisis_busqueda.md`).
+   La prueba de copia sin añadidos también se hizo (1 de 11 aciertan). Queda opcional
+   mirar, en el caché de la cuenta original, si los 32 casos de la frase de `estrategia 7`
+   se concentran en instancias de copia.
+4. Lunes, D9: `oraculo.validar` **una sola vez** y `entrega.json`, con grupo y semana reales.
+5. Lunes, D10 y D11: secciones 04 y 06 del informe y `docs/manual_tecnico.md`
+   (hay un borrador sin integrar, con `PENDIENTE`).
+6. Lunes, D12: revisar la reducción con Sebastián.
 
 **Plan de contingencia:** si el sábado por la noche no hay fecha clara para el primer arranque,
 o el domingo al mediodía no hay una pasada real en curso, Sebastián toma coordenadas y la búsqueda.
@@ -252,6 +262,8 @@ Sin búsqueda real no hay entrega.
 - Confirmar si "medianoche" es el final del lunes y cómo se entrega: enlace al repositorio, PDF o ambos.
 - Fechas de las demás etapas del cronograma.
 - Política de declaración de herramientas de apoyo: por definir.
+- Propuesta D18 (por aprobar): `MAX_PASADAS = 3` para los dos arranques. D17 decía "hasta 2
+  pasadas"; el arranque 0 usó una tercera como verificación y quedó dentro de B.
 
 ---
 

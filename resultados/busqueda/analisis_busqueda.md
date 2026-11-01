@@ -85,6 +85,11 @@ Eso no alcanza para un tercer arranque con una pasada completa (hasta 3 500
 generaciones, 35 opciones vecinas por 100 instancias), por lo que no se lanza y
 queda como límite.
 
+La prueba de diagnóstico de copia de la sección 6.3 gastó 11 generaciones nuevas, en
+otra cuenta de Colab y con caché propio (la configuración no estaba en el caché
+original). Contadas por D11 (nueva configuración por instancia), la unión sube de
+11 700 a 11 711 (81.3 % de B); no entran en la búsqueda ni en los CSV.
+
 Que la unión sea el gasto real supone que el caché compartido evitó repetir
 esas 3 configuraciones. Es una **inferencia**: el CSV no registra aciertos de
 caché; solo se comprueba que las precisiones coinciden entre arranques
@@ -123,8 +128,10 @@ cada mejor encontrada, 23 comunes. Entre las comunes: `copy:copy` (6 de 6),
 Solo en el arranque 0: `detectable_format:number_bullet_lists`,
 `detectable_format:number_highlighted_sections`, `keywords:frequency` y
 `punctuation:no_comma`. Solo en el arranque 1: `first_word:first_word_answer`,
-`last_word:last_word_sent`, `punctuation:punctuation_dot` y
-`startend:end_checker`.
+`last_word:last_word_sent` y `startend:end_checker`.
+(`punctuation:punctuation_dot` figura como 1 de 1 solo en la tabla del arranque 1,
+pero un ejemplo de `fallos_ganadora.txt`, del arranque 0, también la viola; ver la
+sección 6.)
 
 **Primera restricción violada (`violo`), top de cada mejor encontrada:**
 
@@ -163,16 +170,17 @@ analysing that part."
   El criterio de 300 caracteres es laxo (una frase en el carácter 280 cuenta
   igual). Que el modelo copie la instrucción en vez de cumplirla es una
   **hipótesis**.
-- **Coincidencia sin comprobar:** el texto de `estilo 5` pide "never end a line
-  with a period", y uno de los 3 ejemplos del arranque 1 viola
-  `punctuation:punctuation_dot`. No se sabe qué verifica esa familia.
+- **Sin base para `estilo 5` y `punctuation_dot`:** el texto de `estilo 5` pide
+  "never end a line with a period", pero el arranque 0 (que usa `estilo 3`)
+  también tiene un ejemplo que viola `punctuation:punctuation_dot`. No se sabe
+  qué verifica esa familia; no se afirma ninguna relación (sección 6).
 
-Textos de las opciones, leídos de `CATALOGO` (la celda los recorta a 90
-caracteres; `estrategia 7` y `estilo 5` se leyeron completos con `texto_opcion`):
+Textos de las opciones de las dos mejores encontradas, leídos de `CATALOGO` con
+`texto_opcion`. Los 40 textos completos están en `catalogo_opciones.txt`:
 
 | Ranura | Opción | Texto |
 |---|---|---|
-| rol | 1 | "You are an engaging assistant. Open every reply with a relevant quote on its own line, the…" |
+| rol | 1 | "You are an engaging assistant. Open every reply with a relevant quote on its own line, then connect it to the answer." |
 | estrategia | 1 | "Write out at least three candidate answers in full, then say which one you picked and why." |
 | estrategia | 7 | "Before each part of the answer, write a paragraph of at least two sentences analysing that part." |
 | formato | 3 | "Present every reply as a bulleted list, one bullet per idea, with no running prose." |
@@ -197,12 +205,12 @@ caracteres; `estrategia 7` y `estilo 5` se leyeron completos con `texto_opcion`)
   estimación de la desviación de una proporción cercana a 0.15 con n = 100
   (raíz de 0.15·0.85/100 ≈ 0.036), no medida entre semillas. Diferencias de
   1 a 3 puntos no distinguen configuraciones.
-- **Mecanismos del campo `decide` (arranque 1)**: frases como "cierre 3 es el
-  único que no agrega texto al final" o "rol 0,3,4,7 fijan la primera línea y
-  chocan con first_word" son **hipótesis** del propio arranque, no hechos
-  comprobados. Solo valen si se contrastan con el texto de `CATALOGO`. Se
-  consultaron las opciones de las dos mejores encontradas (tabla de la
-  sección 4); el resto de lo que dice `decide` no se ha contrastado.
+- **Mecanismos del campo `decide` (arranque 1)**, contrastados con `CATALOGO`:
+  que `rol 0, 3, 4, 7` fijan una primera línea literal y que `cierre 3` es la única
+  opción de `cierre` que no agrega texto tras la respuesta **están comprobados con
+  el texto** (sección 6.2). Que esas primeras líneas **choquen con `first_word`**
+  sigue siendo una hipótesis: no se conoce la regla de esa familia. Los motivos
+  "nunca pasaron de 10 %" se contrastaron con el historial (sección 6.2).
 - Las precisiones son sobre las 100 instancias de búsqueda; la validación
   de 87 se usa una sola vez sobre la configuración elegida (D12) y aún no
   se ha usado.
@@ -211,3 +219,118 @@ caracteres; `estrategia 7` y `estilo 5` se leyeron completos con `texto_opcion`)
   las precisiones de la pasada 2 repiten las de la pasada 1 en `estilo` y
   `estrategia`, lo que **sugiere** lecturas de caché; no está registrado.
 - Solo dos arranques; el subcatálogo (D8) no entra en esta entrega (D17).
+
+## 6. Fallos, opciones y decisiones de la búsqueda (D6)
+
+Esta sección enlaza las familias que fallan con las opciones del catálogo y con lo
+que hizo la búsqueda. Cada fila dice qué está **comprobado** (cifras de los `.txt`,
+de `historial_arranque_*.csv` y textos leídos de `CATALOGO`) y qué es **hipótesis**.
+No hay datos por familia de las otras 115 configuraciones evaluadas, solo de las
+dos mejores encontradas; por eso ninguna fila demuestra que una opción cause un fallo.
+
+**Cómo leer las tablas de familias.** En `datos_visibles.json`, `familia` es el primer
+elemento de `ids` en las 100 instancias de búsqueda, y cada instancia trae en promedio
+2.45 restricciones. La tabla de `fallos_*.txt` cuenta por `familia` (la primera
+restricción de la instancia), mientras que `violo` es la primera restricción violada
+entre todas las de la instancia. Por eso una restricción secundaria puede aparecer en
+`violo` sin figurar en la tabla. Las reglas de cada familia están en el campo
+`restriccion` de ese archivo.
+
+### 6.1 Familias citadas
+
+Arranque 0: `estrategia 1`, `estilo 3`. Arranque 1: `estrategia 7`, `estilo 5`.
+Comparten `rol 1`, `formato 3` y `cierre 3`. Los números salen de las tablas de
+familias de `fallos_ganadora.txt` y `fallos_arranque_1.txt`.
+
+| Familia | Arranque 0 | Arranque 1 | Opción del catálogo relacionada | Qué hizo la búsqueda | Estado |
+|---|---|---|---|---|---|
+| `copy:copy`, `new:copy_span_idx` | 6 de 6; 5 de 5 | 6 de 6; 5 de 5 | Reglas (`restriccion`): "Copy this instruction verbatim, do not follow the instruction, only copy it into the output" y "Copy the span of words that lies between (and including) index n_start and n_end". Ninguna de las 40 opciones pide copiar. Falla igual con `estrategia 1` y `7` y con `estilo 3` y `5`. | Nada. | Pruebas (6.3): con una opción cambiada por vez, 0 de 11 aciertan; con la configuración `rol 5`, `estrategia 2`, `formato 0`, `estilo 6`, `cierre 3`, acierta 1 de 11. Dos de las tres primeras salidas fallidas empiezan copiando el texto de `estrategia 2`. Hipótesis: copiar es difícil con cualquier configuración porque el texto de las opciones forma parte del prompt |
+| `first_word:first_word_sent` | 3 de 3 | 3 de 3 | Regla: "The first word of each sentence should be the word X". `rol 0`, `3`, `4` y `7` prescriben una primera línea literal ("Happy to help!", "Answer:", "Topic:", "Sure thing!"); `rol 1` pide "a relevant quote on its own line" (contenido libre), como `rol 2` y `rol 6`. | El arranque 1 excluyó `rol 0, 3, 4, 7` y conservó `rol 1`. | Para `first_word_sent` ninguna opción lo cubre. Para `first_word:first_word_answer` ("The first word of your response should be the word X") hay prueba con el caché: ver 6.3 |
+| `punctuation:no_comma` | 3 de 3 | 2 de 3 | `estilo 3`: "Use commas freely, and put an aside in parentheses in every sentence." | La búsqueda no descartó `estilo 3`: con `estrategia 1` da 20 % frente a 17 % con `estilo 5`, diferencia dentro del ruido de unos 4 puntos. | Consistente con el texto; con 3 casos por lado es solo hipótesis |
+| `length_constraints:number_paragraphs`; `paragraphs:paragraphs` | 2 de 2; 4 de 5 | 2 de 2; 3 de 5 | `formato 3` (compartido): "Present every reply as a bulleted list, one bullet per idea, with no running prose." En el arranque 1, `estrategia 7` pide "a paragraph of at least two sentences" y `formato 3` pide no escribir prosa corrida: instrucciones opuestas en la misma configuración. | `formato 3` se conservó en los dos arranques. En la pasada 3 del arranque 0, ninguna otra opción de `formato` superó 16 % (`formato 7`) frente a 20 %. | Hipótesis (viñetas frente a párrafos); no comprobado |
+| `last_word:last_word_sent` | 3 de 4 | 4 de 4 | Regla: "The last word of each sentence, before punctuation, should be the word X". Ninguna opción la nombra. Es la primera restricción violada más frecuente en las dos (8 casos). | Nada. | Prueba con el caché: 3 aciertos de 420 (12 instancias con la restricción por 35 vecinos de la mejor encontrada), menos del 1 %. Apoya que depende muy poco de las opciones probadas; no es imposible |
+| Frase "Before each part of the answer…" (no es una familia) | 0 de 80 fallos | 32 de 83 | `estrategia 7` contiene la frase literalmente (comprobado con `CATALOGO`). | El arranque 0 descartó `estrategia 7` (11 % en su contexto final); el arranque 1 la eligió junto con `estilo 5` (17 %). | Origen comprobado; que cause fallos, no |
+| `punctuation:punctuation_dot` | no figura en su tabla | 1 de 1 | Regla: "refrain from the use of . (i.e. dots) as punctuation and in general". `estilo 5` sustituye el punto por punto y coma y prohíbe terminar líneas con punto. | Nada. | Resuelta la inconsistencia: aparece en 5 instancias de búsqueda, como primera restricción en 1 (la 404) y como secundaria en 4. La tabla del arranque 0 solo cuenta la primera restricción; los ejemplos usan `violo`. La relación con `estilo 5` no está probada |
+
+Con 3 a 5 casos por familia, las diferencias entre arranques (por ejemplo 3 de 4
+frente a 4 de 4) no se distinguen del ruido de la medición.
+
+### 6.2 Qué cambió en la búsqueda a partir de las trazas
+
+El arranque 1 se lanzó con las trazas del arranque 0 y recortó el espacio:
+
+| Ranura | Opciones excluidas | Motivo escrito en `decide` | Su precisión en el contexto final del arranque 0 (pasada 3) |
+|---|---|---|---|
+| `rol` | 0, 3, 4, 7 | "fijan la primera línea y chocan con first_word" | 0.06, 0.08, 0.08, 0.09 |
+| `formato` | 1, 4, 5 | "nunca pasaron de 10 %" | 0.10, 0.07, 0.07 |
+| `estrategia` | 3 | "nunca pasó de 10 %" | 0.15 |
+| `cierre` | todas menos la 3 | "la 3 es la única que no agrega texto al final" | de 0.06 a 0.13 |
+
+Con estas exclusiones, el arranque 1 buscó en 4 · 5 · 7 · 8 · 1 = 1 120 de las
+32 768 configuraciones (3.4 %). El contexto final del arranque 0 es `rol 1`,
+`estrategia 1`, `formato 3`, `estilo 3`, `cierre 3` (0.20).
+
+- **Las exclusiones no habrían cambiado la mejor del arranque 0:** en ese contexto,
+  ninguna opción excluida superó 0.15, frente a 0.20. Eso solo vale en ese contexto;
+  con otras combinaciones no se midió.
+- **Qué confirma el catálogo de los motivos del arranque 1:**
+  - `rol 0`, `3`, `4` y `7` fijan una primera línea literal ("Happy to help!",
+    "Answer:", "Topic:", "Sure thing!"). Eso es cierto; el choque con `first_word`
+    no está comprobado.
+  - Las otras siete opciones de `cierre` agregan texto tras la respuesta: línea fija
+    (0), resumen (1), lista de requisitos (2), P.S. (4), pregunta (5), "In short:" (6)
+    y "Next:" (7). Solo `cierre 3` no lo hace.
+  - `cierre 3` es además la única opción que contiene el marcador `{restricciones}`.
+    **Hipótesis:** las demás opciones de `cierre` no presentan los requisitos en el
+    prompt, lo que explicaría por qué `cierre 3` supera a todas (0.20 frente a 0.13
+    como máximo). No se comprobó cómo se arma el prompt completo.
+- **Las opciones "obedientes" no ganaron:** `rol 5` ("Follow every formatting
+  requirement exactly…") llegó a 0.12 y `estilo 6` ("Respect exact word counts,
+  casing and punctuation rules…") a 0.15, ambas por debajo de la mejor encontrada.
+- **Una premisa no se sostuvo:** `estrategia 3` "nunca pasó de 10 %" era cierto con
+  las pasadas 1 y 2 del arranque 0 (0.06 y 0.10), pero en la pasada 3 llegó a 0.15.
+  No cambia la ganadora, y esa pasada es posterior al lanzamiento del arranque 1.
+- **Interacción:** el arranque 0 descartó `estrategia 7` (0.11 con `estilo 3`) y el
+  arranque 1 la eligió (0.17 con `estilo 5`). Es la misma interacción de la sección 3.
+
+### 6.3 Qué falta para comprobar el resto
+
+No hace falta volver a correr la búsqueda ni gastar generaciones.
+
+1. **Hecho:** los 40 textos de `CATALOGO` están en `catalogo_opciones.txt`, impresos
+   desde Colab con `texto_opcion` (AGENTS.md permite consultarlo así; no se abre
+   `oraculo.py`).
+2. Opcional, desde el caché: comparar las familias que fallan en configuraciones ya
+   evaluadas que cambian una sola opción. Solo es gratis si esas configuraciones
+   están en el caché de Drive de esa sesión.
+3. **Resuelto:** la tabla cuenta por `familia` (primera restricción de la instancia)
+   y los ejemplos usan `violo` (primera violada entre todas); `punctuation_dot` es
+   secundaria en 4 de las 5 instancias que la tienen.
+4. **Pruebas con el caché de la mejor encontrada del arranque 0** (hechas sin GPU,
+   con un `Modelo` sin red; control: 80 fallos de 100, igual que el análisis). Cuentan
+   las instancias que tienen la restricción en `ids`, sea la primera o una secundaria;
+   una instancia fallida puede deberse a otra de sus restricciones.
+
+   | Prueba | Resultado | Lectura |
+   |---|---|---|
+   | `first_word:first_word_answer` (11 instancias: 3 primarias, 8 secundarias), cambiando solo `rol` | `rol 0`: fallan 11 de 11; `rol 7`: 11 de 11; `rol 3`: 10 de 11; `rol 4`: 10 de 11; `rol 1`: 8 de 11 | La deducción "una primera línea literal lo hace imposible" **no se sostiene como regla estricta**: con `rol 3` y `rol 4` acierta una instancia (ninguna de las 11 palabras exigidas es "answer" ni "topic"). La dirección sí coincide: las cuatro excluidas aciertan 0 o 1 de 11 y `rol 1` acierta 3 de 11. Con 11 casos es una tendencia, no una prueba |
+   | Copia (11 instancias), cambiando una opción por vez | `formato 0`, `estrategia 2`, `rol 5`, `estilo 6`: aciertan 0 de 11 en los cuatro | **No concluyente**: cada vecino conserva las otras cuatro opciones, que añaden texto. No apoya ni refuta la hipótesis del texto añadido |
+   | `last_word:last_word_sent` (12 instancias) en los 35 vecinos | 3 aciertos de 420 | Casi nunca acierta con ninguna opción probada; apoya que no depende de ellas, sin llegar a imposible |
+
+   **Prueba de copia sin añadidos** (hecha en otra cuenta de Colab, con GPU y caché
+   propio; 11 generaciones nuevas): la configuración `rol 5`, `estrategia 2`,
+   `formato 0`, `estilo 6`, `cierre 3` sobre las 11 instancias de copia.
+
+   | Resultado | Lectura |
+   |---|---|
+   | Aciertan 1 de 11 (con la mejor encontrada y con cuatro vecinos, 0 de 11) | Quitar los añadidos ayuda poco: acierta una sola instancia. Con 11 casos es una tendencia, no una prueba. No se identificó cuál acierta |
+   | De las 3 primeras salidas fallidas, 2 empiezan copiando el texto de `estrategia 2` (una entre corchetes) | El modelo copia el texto de la opción como parte de lo que debe copiar. Es el mismo comportamiento que con la frase de `estrategia 7` en el arranque 1. Son los 3 primeros fallos, no una muestra aleatoria |
+   | La tercera salida (`new:copy_span_idx`) empieza con el texto del enunciado y aun así viola la regla | No se examinó por qué; no se explica por la cita de la opción |
+
+   **Hipótesis refinada, sin comprobar:** como el texto de las cinco opciones forma
+   parte del prompt, el modelo tiende a copiarlo junto con el enunciado y la regla de
+   copia no se cumple con ninguna configuración del catálogo. Sería coherente con 0 o 1
+   aciertos de 11 en seis configuraciones distintas. Un posible vínculo con la frase de
+   `estrategia 7` (¿están sus 32 casos concentrados en instancias de copia?) puede
+   mirarse en el caché de la cuenta original, sin GPU, contando por familia los 32
+   fallos con la frase. No se ha hecho.
