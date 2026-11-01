@@ -191,7 +191,7 @@ su interior y lanza `PresupuestoAgotado`.
 
 ## 8. Estado actual del repositorio
 
-Última actualización: domingo 2026-11-01, 18:30. Antes de seguir, ejecuta `git fetch origin`,
+Última actualización: domingo 2026-11-01, después del congelamiento de las 18:30. Antes de seguir, ejecuta `git fetch origin`,
 `git log origin/main --oneline -5` y `git branch -r`: Dylber pudo haber subido trabajo.
 
 **Entrega:** lunes 2026-11-02 a medianoche (se asume 23:59). Corte de trabajo nuevo: lunes 20:00.
@@ -209,7 +209,7 @@ Qué hace cada uno y qué bloquea a quién: `docs/reparto_primera_entrega.md`.
 | S12: README | Listo | El ejemplo da el resultado esperado |
 | D5: búsqueda real | Listo | Dos arranques convergidos; unión de 117 configuraciones y 11 700 generaciones de B = 14 400 (`resultados/busqueda/`, `resumir.py`) |
 | D6: análisis de fallos | Redactado | `resultados/busqueda/analisis_busqueda.md`, sección 6, con los 40 textos de `CATALOGO` en `catalogo_opciones.txt`; los vínculos opción-fallo siguen como hipótesis |
-| D7: `notebooks/busqueda.ipynb` | Selector único integrado (PR #6); parada y validación pendientes de PR | Commit `8758576` en `exp/resultados-3pasadas`; sin probar en Colab |
+| D7: `notebooks/busqueda.ipynb` | Listo, falta probarlo en Colab | Selector único (PR #6) y celdas de parada y validación (PR #8) integrados en `main`; la celda de validación no se ha ejecutado |
 | D8: configuración congelada | Listo | Registro del 2026-11-01, 18:30 en `docs/bitacora/2026-10.md`, con huellas de los archivos fuente |
 
 **Configuración congelada (tarea D8, domingo 2026-11-01, 18:30):** rol 1, estrategia 1,
@@ -233,9 +233,8 @@ evidencia nueva y acuerdo del equipo. Registro y huellas: `docs/bitacora/2026-10
 
 ### Pendiente de Dylber
 
-1. D8: etiquetar `main` con `config-congelada` y avisar a Sebastián (S11 y S13).
-2. D7: integrar el PR de la parada y la validación (`exp/resultados-3pasadas`, commit
-   `8758576`) y probar la celda de parámetros en Colab con `ARRANQUE = 0` y `1`.
+1. D8: avisar a Sebastián (S11 y S13). La etiqueta `config-congelada` ya existe en `main` (`6e5d003`).
+2. D7: probar en Colab, sin GPU, la celda de parámetros con `ARRANQUE = 0` y `1`.
 3. D6: las pruebas con el caché ya se hicieron (sección 6.3 de `analisis_busqueda.md`).
    La prueba de copia sin añadidos también se hizo (1 de 11 aciertan). Queda opcional
    mirar, en el caché de la cuenta original, si los 32 casos de la frase de `estrategia 7`
