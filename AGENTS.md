@@ -208,7 +208,7 @@ Qué hace cada uno y qué bloquea a quién: `docs/reparto_primera_entrega.md`.
 | S9: notebook de evaluación | Sin probar en Colab | Solo probado con modelo y oráculo simulados |
 | S12: README | Listo | El ejemplo da el resultado esperado |
 | D5: búsqueda real | Listo | Dos arranques convergidos; unión de 117 configuraciones y 11 700 generaciones de B = 14 400 (`resultados/busqueda/`, `resumir.py`) |
-| D6: análisis de fallos | Redactado | `resultados/busqueda/analisis_busqueda.md`, sección 6; faltan por leer las opciones restantes de `CATALOGO` |
+| D6: análisis de fallos | Redactado | `resultados/busqueda/analisis_busqueda.md`, sección 6, con los 40 textos de `CATALOGO` en `catalogo_opciones.txt`; los vínculos opción-fallo siguen como hipótesis |
 | D7: `notebooks/busqueda.ipynb` | Selector único pendiente de PR | Commit `6615783` en `exp/resultados-3pasadas`; sin probar en Colab |
 
 **Mejor encontrada hasta ahora (D8 sin congelar):** rol 1, estrategia 1, formato 3, estilo 3,
@@ -233,8 +233,8 @@ paró por convergencia en su pasada 3. No es un óptimo global ni del subcatálo
 1. D8: congelar la configuración del arranque 0 y anotar commit y hora.
 2. D7: integrar el PR del selector único y probar la celda de parámetros en Colab con
    `ARRANQUE = 0` y `1`.
-3. D6: imprimir `CATALOGO` completo en Colab y completar la sección 6 de
-   `analisis_busqueda.md`.
+3. D6: aclarar la inconsistencia de `punctuation_dot` entre la tabla y los ejemplos de
+   `fallos_ganadora.txt` y, si se quiere, comparar familias desde el caché.
 4. Lunes, D9: `oraculo.validar` **una sola vez** y `entrega.json`, con grupo y semana reales.
 5. Lunes, D10 y D11: secciones 04 y 06 del informe y `docs/manual_tecnico.md`
    (hay un borrador sin integrar, con `PENDIENTE`).
