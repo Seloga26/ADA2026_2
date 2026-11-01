@@ -1,0 +1,70 @@
+Fallos: 80 de 100
+copy:copy                                                 6 fallos de   6
+new:copy_span_idx                                         5 fallos de   5
+paragraphs:paragraphs                                     4 fallos de   5
+change_case:capital_word_frequency                        4 fallos de   4
+letters:letter_counting2                                  3 fallos de   3
+last_word:last_word_sent                                  3 fallos de   4
+keywords:keyword_specific_position                        3 fallos de   3
+first_word:first_word_sent                                3 fallos de   3
+change_case:english_capital                               3 fallos de   5
+punctuation:no_comma                                      3 fallos de   3
+keywords:start_end                                        3 fallos de   3
+copy:copying_multiple                                     2 fallos de   2
+keywords:existence                                        2 fallos de   4
+language:response_language                                2 fallos de   2
+keywords:word_once                                        2 fallos de   2
+length_constraints:number_paragraphs                      2 fallos de   2
+first_word:first_word_answer                              2 fallos de   3
+copy:repeat_phrase                                        2 fallos de   2
+last_word:last_word_answer                                2 fallos de   4
+detectable_format:sentence_hyphens                        2 fallos de   2
+detectable_format:number_highlighted_sections             2 fallos de   2
+detectable_format:constrained_response                    2 fallos de   3
+detectable_format:title                                   2 fallos de   2
+startend:quotation                                        1 fallos de   2
+keywords:letter_frequency                                 1 fallos de   1
+length_constraints:number_words                           1 fallos de   1
+detectable_format:square_brackets                         1 fallos de   1
+letters:letter_counting                                   1 fallos de   1
+detectable_format:json_format                             1 fallos de   1
+detectable_format:bigram_wrapping                         1 fallos de   1
+keywords:forbidden_words                                  1 fallos de   3
+combination:repeat_prompt                                 1 fallos de   1
+detectable_format:multiple_sections                       1 fallos de   2
+keywords:frequency                                        1 fallos de   1
+detectable_format:number_bullet_lists                     1 fallos de   1
+punctuation:punctuation_exclamation                       1 fallos de   2
+length_constraints:nth_paragraph_first_word               1 fallos de   1
+length_constraints:number_sentences                       1 fallos de   1
+change_case:english_lowercase                             1 fallos de   2
+
+Primera restricción violada (campo violo), top 10:
+  8  last_word:last_word_sent
+  6  copy:copy
+  5  new:copy_span_idx
+  4  keywords:keyword_specific_position
+  4  first_word:first_word_sent
+  4  detectable_format:sentence_hyphens
+  4  copy:repeat_phrase
+  3  detectable_format:square_brackets
+  3  keywords:word_once
+  3  keywords:start_end
+
+Ejemplos de salida fallida:
+violó: letters:letter_counting2
+<<The Path of Wisdom>>
+
+- "The path of wisdom is not paved with gold, but with knowledge and humility."  
+- "A true leader walks with the crowd, but sees the path ahead."  
+- "The journey of a thousand miles begins with a single step, and that step is courage."  
+
+Is there anything else I can help w
+------------------------------------------------------------
+violó: punctuation:punctuation_dot
+- "The average completion percentage of all projects is calculated by summing the completion percentages of all projects and dividing by the total number of projects. This provides a general sense of how much progress has been made across the board. If no projects are present, the average completion
+------------------------------------------------------------
+violó: startend:quotation
+"the stranger's love story was shared with many people across two cities, and the total number of people who heard it can be calculated by tracking the flow of the story through each city and the number of people each day."
+
+"the stranger shared their story with 5 people each day in the first city, 
