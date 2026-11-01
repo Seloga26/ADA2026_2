@@ -234,7 +234,9 @@ paró por convergencia en su pasada 3. No es un óptimo global ni del subcatálo
 2. D7: integrar el PR del selector único y probar la celda de parámetros en Colab con
    `ARRANQUE = 0` y `1`.
 3. D6: las pruebas con el caché ya se hicieron (sección 6.3 de `analisis_busqueda.md`).
-   Queda opcional una prueba de copia con una configuración sin añadidos (necesita GPU).
+   La prueba de copia sin añadidos también se hizo (1 de 11 aciertan). Queda opcional
+   mirar, en el caché de la cuenta original, si los 32 casos de la frase de `estrategia 7`
+   se concentran en instancias de copia.
 4. Lunes, D9: `oraculo.validar` **una sola vez** y `entrega.json`, con grupo y semana reales.
 5. Lunes, D10 y D11: secciones 04 y 06 del informe y `docs/manual_tecnico.md`
    (hay un borrador sin integrar, con `PENDIENTE`).
