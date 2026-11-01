@@ -233,8 +233,8 @@ paró por convergencia en su pasada 3. No es un óptimo global ni del subcatálo
 1. D8: congelar la configuración del arranque 0 y anotar commit y hora.
 2. D7: integrar el PR del selector único y probar la celda de parámetros en Colab con
    `ARRANQUE = 0` y `1`.
-3. D6: aclarar la inconsistencia de `punctuation_dot` entre la tabla y los ejemplos de
-   `fallos_ganadora.txt` y, si se quiere, comparar familias desde el caché.
+3. D6: probar con el caché de Drive (sin GPU) las hipótesis de la sección 6.3 de
+   `analisis_busqueda.md` (primera palabra, copia y `last_word_sent`).
 4. Lunes, D9: `oraculo.validar` **una sola vez** y `entrega.json`, con grupo y semana reales.
 5. Lunes, D10 y D11: secciones 04 y 06 del informe y `docs/manual_tecnico.md`
    (hay un borrador sin integrar, con `PENDIENTE`).
