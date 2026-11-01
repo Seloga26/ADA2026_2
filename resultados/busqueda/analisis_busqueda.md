@@ -13,6 +13,9 @@ python resumir.py historial_arranque_0_2pasadas.csv historial_arranque_1_limpio.
     --esperado-union 97 --esperado-generaciones 9700
 ```
 
+En todo el documento, "mejor encontrada" es la mejor configuración que halló cada arranque;
+no se afirma que sea óptima, ni global ni del subcatálogo (D8).
+
 Modelo `qwen17b`, temperatura 0.0, semilla 1, 100 instancias de búsqueda por
 configuración (D2). Las 100 instancias por configuración se infieren en
 `resumir.py` como consultas finales / configuraciones distintas (7 100 / 71).
@@ -25,7 +28,7 @@ configuración (D2). Las 100 instancias por configuración se infieren en
 | Precisión (100 instancias de búsqueda) | 0.20 | 0.17 |
 | Configuraciones distintas | 71 | 28 |
 | Generaciones (distintas × 100) | 7 100 | 2 800 |
-| Fallos de la ganadora | 80 de 100 | 83 de 100 |
+| Fallos de la mejor encontrada | 80 de 100 | 83 de 100 |
 | Fuente | `historial_arranque_0_2pasadas.csv` | `historial_arranque_1_limpio.csv` |
 
 Las ocho mejores de la unión (precisión sobre búsqueda, no sobre validación):
@@ -94,13 +97,13 @@ esto es lo que ilustran los dos arranques. Con una sola celda por combinación
 estrategia 1 **no es concluyente por sí sola**; la de 11 frente a 17 de la
 estrategia 7 es mayor que ese ruido, pero tampoco se ha repetido.
 
-## 4. Fallos de las dos ganadoras
+## 4. Fallos de las dos mejores encontradas
 
 Fuente: `fallos_ganadora.txt` (arranque 0) y `fallos_arranque_1.txt`
 (arranque 1). Cada uno lista las familias que fallan y 3 ejemplos de salida.
 
 **Familias que fallan siempre** (N fallos de N apariciones): 27 familias en
-cada ganadora, 23 comunes. Entre las comunes: `copy:copy` (6 de 6),
+cada mejor encontrada, 23 comunes. Entre las comunes: `copy:copy` (6 de 6),
 `new:copy_span_idx` (5 de 5), `change_case:capital_word_frequency` (4 de 4),
 `letters:letter_counting2`, `keywords:keyword_specific_position`,
 `first_word:first_word_sent`, `keywords:start_end` (3 de 3),
@@ -113,7 +116,7 @@ Solo en el arranque 0: `detectable_format:number_bullet_lists`,
 `last_word:last_word_sent`, `punctuation:punctuation_dot` y
 `startend:end_checker`.
 
-**Primera restricción violada (`violo`), top de cada ganadora:**
+**Primera restricción violada (`violo`), top de cada mejor encontrada:**
 
 | Arranque 0 | | Arranque 1 | |
 |---|---|---|---|
@@ -123,7 +126,7 @@ Solo en el arranque 0: `detectable_format:number_bullet_lists`,
 | `keywords:keyword_specific_position`, `first_word:first_word_sent`, `detectable_format:sentence_hyphens`, `copy:repeat_phrase` | 4 cada una | `keywords:word_once`, `detectable_format:square_brackets`, `keywords:keyword_specific_position`, `first_word:first_word_sent`, `change_case:capital_word_frequency`, `keywords:start_end`, `change_case:english_capital` | 4 cada una |
 
 Los tres primeros puestos coinciden y las dos listas se parecen mucho: las
-dos ganadoras fallan casi en las mismas familias.
+dos mejores encontradas fallan casi en las mismas familias.
 
 **Frase inicial (inferencia, no prueba).** En los 3 ejemplos de salida fallida
 del arranque 1 aparece la frase "Before each part of the answer, write a
