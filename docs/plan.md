@@ -86,7 +86,7 @@ El informe las presenta en una tabla, con la decisión tomada en cada caso.
 
 Otras inconsistencias comprobadas:
 
-- 91 444 no cuadra con ninguna lectura: 3840·2·log₂3840 ≈ 91 447,6, y con ⌈log₂⌉ da 92 160.
+- 91 444 sí cuadra: 3840·2·log₂3840 = 91 444,92, y su parte entera es 91 444, la cifra del enunciado. Con ⌈log₂⌉ da 92 160.
 - La fórmula de Successive Halving solo es exacta si \|C\| es potencia de 2.
 - Con 5 categorías fijas, \|C\| es constante y el problema es polinomial. Por eso L y k_i
   son parte de la entrada de la reducción (D9).
