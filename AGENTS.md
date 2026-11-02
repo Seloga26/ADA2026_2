@@ -191,7 +191,7 @@ su interior y lanza `PresupuestoAgotado`.
 
 ## 8. Estado actual del repositorio
 
-Última actualización: domingo 2026-11-01, después del congelamiento de las 18:30. Antes de seguir, ejecuta `git fetch origin`,
+Última actualización: domingo 2026-11-01, después de probar S10 en Colab. Antes de seguir, ejecuta `git fetch origin`,
 `git log origin/main --oneline -5` y `git branch -r`: Dylber pudo haber subido trabajo.
 
 **Entrega:** lunes 2026-11-02 a medianoche (se asume 23:59). Corte de trabajo nuevo: lunes 20:00.
@@ -205,7 +205,8 @@ Qué hace cada uno y qué bloquea a quién: `docs/reparto_primera_entrega.md`.
 | S2 a S4: contratos, `OraculoContado`, sintético, fuerza bruta | Listo | 60 pruebas pasan con `uv run pytest` |
 | S5: velocidad en Colab | Listo | `resultados/velocidad.json`: 1,99 s por generación, 5,77 GB |
 | S7 y S8: reducción y muestreo | Redactado | `informe/secciones/02_reduccion.tex`; compila |
-| S9: notebook de evaluación | Sin probar en Colab | Solo probado con modelo y oráculo simulados |
+| S9 y S10: notebook de evaluación | Probado en Colab con datos de prueba | T4 y modelo real, con `entrega.json` temporal y 8 instancias de búsqueda: corrieron todas las celdas y el selector de archivos. Sin `entrega.json` definitivo ni datos privados reales |
+| S6: revisión de coordenadas | Listo | PR #2 integrado en `main` |
 | S12: README | Listo | El ejemplo da el resultado esperado |
 | D5: búsqueda real | Listo | Dos arranques convergidos; unión de 117 configuraciones y 11 700 generaciones de B = 14 400 (`resultados/busqueda/`, `resumir.py`) |
 | D6: análisis de fallos | Redactado | `resultados/busqueda/analisis_busqueda.md`, sección 6, con los 40 textos de `CATALOGO` en `catalogo_opciones.txt`; los vínculos opción-fallo siguen como hipótesis |
@@ -222,18 +223,14 @@ evidencia nueva y acuerdo del equipo. Registro y huellas: `docs/bitacora/2026-10
 
 1. Rehacer la reducción en papel, sin mirar; se defiende sin notas.
 2. Verificar en la fuente las citas de `informe/referencias.bib` (Karp, Hoeffding, Auer).
-3. S10: probar `notebooks/evaluacion.ipynb` en Colab.
-   - `entrega.json` aún no existe: usar una celda temporal, sin guardarla en el repositorio,
-     que escriba este archivo de prueba antes de `cargar_entrega`:
-     `{"grupo": "G00", "semana": 1, "config": {"rol": 2, "estrategia": 1, "formato": 4, "estilo": 1, "cierre": 7, "temperatura": 0.0}}`
-   - Subir a Colab una copia recortada de `datos_visibles.json` llamada `datos_privados.json`.
-4. S6: revisar el PR de coordenadas en menos de 2 horas.
-5. Lunes: S11 conectar el `entrega.json` definitivo, S13 integrar `informe/main.tex` antes de
+3. Lunes: S11 conectar el `entrega.json` definitivo, S13 integrar `informe/main.tex` antes de
    las 16:00 y S14 probar desde un clon limpio.
+4. En S13, completar la sección 07 de discrepancias, que no tenía responsable (D1 y D13), y
+   declarar que las secciones 03 y 05 quedan fuera de esta entrega.
 
 ### Pendiente de Dylber
 
-1. D8: avisar a Sebastián (S11 y S13). La etiqueta `config-congelada` ya existe en `main` (`6e5d003`).
+1. D8: crear y subir la etiqueta `config-congelada`; el 2026-11-01 no estaba en el remoto.
 2. D7: probar en Colab, sin GPU, la celda de parámetros con `ARRANQUE = 0` y `1`.
 3. D6: las pruebas con el caché ya se hicieron (sección 6.3 de `analisis_busqueda.md`).
    La prueba de copia sin añadidos también se hizo (1 de 11 aciertan). Queda opcional
@@ -241,7 +238,12 @@ evidencia nueva y acuerdo del equipo. Registro y huellas: `docs/bitacora/2026-10
    se concentran en instancias de copia.
 4. Lunes, D9: `oraculo.validar` **una sola vez** y `entrega.json`, con grupo y semana reales.
 5. Lunes, D10 y D11: secciones 04 y 06 del informe y `docs/manual_tecnico.md`
-   (hay un borrador sin integrar, con `PENDIENTE`).
+   (la bitácora menciona un borrador, pero no está en ninguna rama remota). Al redactar, declarar que:
+   - el arranque 1 no es independiente: usó exclusiones derivadas del arranque 0 y su
+     columna `arranque` dice `0`;
+   - su 17 % no es un óptimo local completo: 15 de 35 vecinos quedaron sin evaluar. Los 35 de la
+     ganadora sí se evaluaron;
+   - la premisa de esas exclusiones sobre `estrategia 3` resultó falsa: llegó a 15 %.
 6. Lunes, D12: revisar la reducción con Sebastián.
 
 **Plan de contingencia:** si el sábado por la noche no hay fecha clara para el primer arranque,
