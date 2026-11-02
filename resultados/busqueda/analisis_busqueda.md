@@ -85,10 +85,18 @@ Eso no alcanza para un tercer arranque con una pasada completa (hasta 3 500
 generaciones, 35 opciones vecinas por 100 instancias), por lo que no se lanza y
 queda como límite.
 
-La prueba de diagnóstico de copia de la sección 6.3 gastó 11 generaciones nuevas, en
-otra cuenta de Colab y con caché propio (la configuración no estaba en el caché
-original). Contadas por D11 (nueva configuración por instancia), la unión sube de
-11 700 a 11 711 (81.3 % de B); no entran en la búsqueda ni en los CSV.
+El gasto de la búsqueda es de 11 700 generaciones (81.25 % de B), comprobado con el caché
+de la cuenta principal (117 configuraciones por 100 instancias). Aparte quedan, sin
+contar en esa cifra:
+
+| Qué | Generaciones | Dónde consta |
+|---|---|---|
+| Pruebas del caché (B2 y otra de 10 instancias) | 20 | Caché de la cuenta principal |
+| Diagnóstico de copia (sección 6.3) | 11 | Otra cuenta de Colab con caché propio; no se puede comprobar con ese archivo |
+| Validación (D12) | 87 | Caché de la cuenta principal; es la prueba, no entra en B |
+
+Si D11 se leyera como todo lo generado antes de validar, serían 11 731 (81.5 % de B). En
+cualquier lectura queda por debajo de B = 14 400. No entran en los CSV.
 
 Que la unión sea el gasto real supone que el caché compartido evitó repetir
 esas 3 configuraciones. Es una **inferencia**: el CSV no registra aciertos de
