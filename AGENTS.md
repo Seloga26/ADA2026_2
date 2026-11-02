@@ -259,8 +259,8 @@ Sin búsqueda real no hay entrega.
 
 ### Pendientes del equipo
 
-- Identificador real del grupo y semana para `entrega.json`; el notebook trae `G07` y `3`, y el
-  nombre de la guía sugiere Grupo 1, sin confirmar.
+- Grupo de `entrega.json`: `"ADAG1"`, confirmado por Dylber el 2026-11-02. Falta confirmar la
+  semana (hoy `6`, provisional).
 - Confirmar si "medianoche" es el final del lunes y cómo se entrega: enlace al repositorio, PDF o ambos.
 - Fechas de las demás etapas del cronograma.
 - Política de declaración de herramientas de apoyo: por definir.
