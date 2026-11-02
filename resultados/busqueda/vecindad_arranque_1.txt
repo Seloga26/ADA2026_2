@@ -1,0 +1,71 @@
+Vecindad completa de la mejor encontrada del arranque 1
+=======================================================
+
+Qué es: los 35 vecinos por una ranura de la mejor del arranque 1, sin exclusiones.
+Es un experimento posterior al congelamiento de la configuración (D8, 2026-11-01, 18:30).
+No interviene en la elección de la configuración entregada.
+
+Configuración base: {"rol": 1, "estrategia": 7, "formato": 3, "estilo": 5, "cierre": 3, "temperatura": 0.0}
+Lote: las 100 instancias de búsqueda. Modelo qwen17b, temperatura 0.0, semilla 1.
+Dónde se corrió: otra cuenta de Colab, con una copia del oraculo_cache.json de la búsqueda.
+Los 20 vecinos ya evaluados salieron del caché; los otros 15 (los excluidos en el arranque 1)
+costaron como máximo 1 500 generaciones, fuera de las 11 700 de la búsqueda.
+Fecha de ejecución: no registrada en este archivo.
+
+Código de la celda (salida literal más abajo):
+
+    base = {"rol": 1, "estrategia": 7, "formato": 3, "estilo": 5, "cierre": 3, "temperatura": 0.0}
+    p_base = oraculo.evaluar(base, busqueda, semilla=SEMILLA).precision
+    vecinos = []
+    for ranura in RANURAS:
+        for opcion in range(OPCIONES_POR_RANURA):
+            if opcion == base[ranura]:
+                continue
+            p = oraculo.evaluar(dict(base, **{ranura: opcion}), busqueda, semilla=SEMILLA).precision
+            vecinos.append((ranura, opcion, p))
+            print(f"{ranura:>10} {opcion} {p:6.1%} {'MEJORA' if p > p_base else ''}")
+
+Salida:
+
+base: 17.0%
+       rol 0  12.0%
+       rol 2  10.0%
+       rol 3  14.0%
+       rol 4  10.0%
+       rol 5  12.0%
+       rol 6  12.0%
+       rol 7  13.0%
+estrategia 0  12.0%
+estrategia 1  17.0%
+estrategia 2   9.0%
+estrategia 3  12.0%
+estrategia 4  12.0%
+estrategia 5   9.0%
+estrategia 6  11.0%
+   formato 0  14.0%
+   formato 1   8.0%
+   formato 2   8.0%
+   formato 4   9.0%
+   formato 5   8.0%
+   formato 6  12.0%
+   formato 7  13.0%
+    estilo 0  15.0%
+    estilo 1  14.0%
+    estilo 2  12.0%
+    estilo 3  11.0%
+    estilo 4  13.0%
+    estilo 6  14.0%
+    estilo 7  15.0%
+    cierre 0  10.0%
+    cierre 1  13.0%
+    cierre 2   8.0%
+    cierre 4  10.0%
+    cierre 5   8.0%
+    cierre 6  12.0%
+    cierre 7   8.0%
+vecinos: 35 | mejores que la base: 0 | máximo: 17.0%
+
+Lectura: ningún vecino supera al 17 %. El máximo, 17 %, es un empate con estrategia 1,
+configuración que ya estaba en el historial (rol 1, estrategia 1, formato 3, estilo 5, cierre 3).
+Las 15 opciones antes excluidas (rol 0, 3, 4, 7; formato 1, 4, 5; estrategia 3;
+cierre 0, 1, 2, 4, 5, 6, 7) dieron como máximo 14 % (rol 3).

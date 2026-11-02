@@ -283,8 +283,9 @@ diferencia con la búsqueda (1,6 puntos) está dentro del ruido; es coherente co
 cuenta de Colab con una copia del caché): se evaluaron los 35 vecinos por una ranura de su
 mejor. Ninguno supera el 17 %; el máximo es 17 % (un empate con la estrategia 1, ya en el
 historial). Así, el 17 % es un óptimo local por ranura completo. No cambia la
-configuración entregada. La salida impresa de esa celda se reproduce en el informe
-(sección 6); el archivo de evidencia aún no está en el repositorio (`PENDIENTE`).
+configuración entregada. La salida impresa de esa celda y su código están en
+`resultados/busqueda/vecindad_arranque_1.txt`; se resumen en el informe (sección 6). La
+fecha exacta de la ejecución no quedó registrada.
 
 ## 7. Validación
 
