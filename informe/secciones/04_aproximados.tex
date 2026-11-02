@@ -2,4 +2,170 @@
 \section{Algoritmos aproximados}
 \label{sec:aproximados}
 
-% Coordenadas y UCB1: pseudocódigo, T(n), garantías y óptimos locales.
+El aproximado principal es la búsqueda por coordenadas (D3). Es la técnica que se
+implementó y se ejecutó con el modelo real; sus resultados están en la
+sección~\ref{sec:experimentos}. El reparto uniforme frente a UCB1 no se desarrolla en esta
+entrega (sección~\ref{sec:reparto}) y aquí no se le atribuye ninguna cota.
+
+\subsection{Descripción del algoritmo}
+
+Se usa la notación de la sección~\ref{sec:formalizacion}: $L$ ranuras, la ranura $i$ con
+$k_i$ opciones y $\Acc(c)$ la fracción de instancias del lote $I$ que $c$ cumple por
+completo. Para cada ranura $i$ hay un conjunto de opciones permitidas
+$O_i\subseteq\{0,\dots,k_i-1\}$, que por defecto es todo el rango. Reducirlo es la forma de
+aplicar lo que enseñan las trazas de fallos (sección~\ref{sec:experimentos}). Sea $\pi$ un
+orden de las ranuras y $P$ el tope de pasadas. Escribimos $c[i{:=}o]$ para la configuración
+que sale de $c$ cambiando solo la ranura $i$ a la opción $o$.
+
+\begin{algorithm}[h]
+\caption{Coordenadas con un arranque}
+\label{alg:coordenadas}
+\begin{algorithmic}[1]
+\Require orden $\pi$, opciones permitidas $O_i$, tope de pasadas $P$, presupuesto $B$
+\State elegir $c$ al azar, con $c_i\in O_i$ para toda ranura $i$ \Comment{semilla fija}
+\State $a\gets\Acc(c)$
+\For{$t=1,\dots,P$}
+  \State $\textit{mejoró}\gets\text{falso}$
+  \For{cada ranura $i$ en el orden $\pi$}
+    \For{cada opción $o\in O_i$ con $o\neq c_i$}
+      \State $c'\gets c[i{:=}o]$;\quad $a'\gets\Acc(c')$
+      \If{$a'>a$} \Comment{mejora estricta}
+        \State $c\gets c'$;\quad $a\gets a'$;\quad $\textit{mejoró}\gets\text{verdadero}$
+      \EndIf
+    \EndFor
+  \EndFor
+  \If{\textbf{no} \textit{mejoró}} \State \textbf{salir} \Comment{pasada completa sin cambios} \EndIf
+\EndFor
+\State \Return $c$
+\end{algorithmic}
+\end{algorithm}
+
+Dos detalles de la implementación (\texttt{coordenadas.py}) que el pseudocódigo respeta. La
+comparación $o\neq c_i$ usa la opción \emph{actual} en ese momento: tras aceptar un cambio
+dentro de una ranura, la opción anterior vuelve a probarse más adelante en esa misma
+ranura (sale del caché, sin generaciones nuevas). Y si el presupuesto $B$ se agota, el
+algoritmo devuelve la mejor configuración vista hasta ahí, que es la actual por el
+lema~\ref{lem:monotonia}. Varios arranques son repeticiones independientes del algoritmo
+desde puntos de partida distintos; se devuelve la mejor de las configuraciones finales.
+
+\subsection{Propiedades}
+
+\begin{lema}[Monotonía]\label{lem:monotonia}
+La precisión de la configuración actual no decrece, y cada cambio la aumenta de forma
+estricta. En particular, la configuración devuelta es al menos tan buena como la de partida.
+\end{lema}
+\begin{proof}
+La configuración solo cambia en la línea con la condición $a'>a$, y en ese caso $a$ pasa a
+$a'$, estrictamente mayor. Si no hay cambio, $c$ y $a$ quedan igual.
+\end{proof}
+
+\begin{lema}[Terminación]\label{lem:terminacion}
+Con $\Acc$ determinista, el algoritmo hace a lo sumo $n$ cambios y a lo sumo
+$\min(P,\,n+1)$ pasadas.
+\end{lema}
+\begin{proof}
+$\Acc(c)$ toma valores en $\{0,\tfrac1n,\dots,1\}$, así que cada cambio lo sube al menos
+$\tfrac1n$, y como parte de al menos $0$ y no pasa de $1$, solo cabe $n$ veces. Toda pasada
+que no es la última contiene al menos un cambio, de modo que hay a lo sumo $n$ pasadas con
+cambios más la pasada final sin cambios.
+\end{proof}
+
+\begin{teorema}[Óptimo local por ranura]\label{teo:optimo-local}
+Si el algoritmo termina porque una pasada completa no cambió nada, la configuración $c$
+devuelta cumple $\Acc(c[i{:=}o])\le\Acc(c)$ para toda ranura $i$ y toda opción $o\in O_i$.
+\end{teorema}
+\begin{proof}
+En esa pasada la configuración no cambió, así que todos los candidatos $c[i{:=}o]$ se
+compararon contra el mismo $a=\Acc(c)$ y ninguno lo superó estrictamente. Cada candidato con
+$o\in O_i$ y $o\ne c_i$ se evaluó en esa pasada; el caso $o=c_i$ da $c$ mismo.
+\end{proof}
+
+El teorema depende de que $\Acc$ devuelva el mismo valor cada vez que se evalúa una
+configuración. Con un oráculo exacto es inmediato; con el modelo real se apoya en la
+temperatura $0{,}0$ y en el caché, que devuelve lo ya generado (D2).
+
+Es un óptimo \emph{por ranura}: ningún cambio de una sola ranura mejora, pero no se prueba
+ningún cambio simultáneo de dos ranuras. Además, si $O_i$ se reduce a un subconjunto, el
+óptimo es local respecto a ese subespacio, no respecto a todas las opciones. La
+sección~\ref{sec:experimentos} muestra que esto ocurrió en el arranque 1.
+
+\subsection{Costo $T(n)$}
+
+El costo se mide en generaciones, que es lo que cobra el presupuesto $B$ (D11): una
+generación tarda unos $1{,}99$ s en la GPU del proyecto, mucho más que cualquier otra
+operación del algoritmo. Evaluar una configuración sobre $I$ cuesta $n$ generaciones, una
+por instancia.
+
+\begin{teorema}[Costo]\label{teo:costo}
+Sea $p\le\min(P,n+1)$ el número de pasadas realizadas. El número de evaluaciones de
+configuraciones es a lo sumo $1+p\sum_i|O_i|$, y las generaciones, a lo sumo
+\[
+  T(n)\;\le\; n\Bigl(1+p\sum_{i=1}^{L}|O_i|\Bigr)\;=\;O(p\cdot L\cdot k_{\max}\cdot n).
+\]
+\end{teorema}
+\begin{proof}
+En una pasada, el recorrido de la ranura $i$ examina cada opción de $O_i$ una vez, y
+evalúa todas menos la actual, así que hace a lo sumo $|O_i|$ evaluaciones. Sumar sobre las
+ranuras da $\sum_i|O_i|$ por pasada, más la evaluación inicial. Cada evaluación son $n$
+generaciones. El caché solo puede bajar la cifra, porque no cobra una pareja
+(configuración, instancia) ya generada.
+\end{proof}
+
+Con $P$ constante, el costo es lineal en $n$. Sin tope, el lema~\ref{lem:terminacion} da
+$p\le n+1$ y el peor caso sube a $O(L\cdot k_{\max}\cdot n^2)$. El costo no depende de
+$|\conf|=\prod_i k_i$, a diferencia del recorrido exhaustivo, que es $O(|\conf|\cdot n)$.
+
+Para el caso del proyecto, $L=5$, $k_i=8$ y $n=100$:
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+Concepto & Generaciones, cota \\
+\midrule
+Una pasada, sin exclusiones: $5\cdot 8\cdot 100$ & $4\,000$ \\
+Un arranque con $P=3$: $100\,(1+3\cdot 40)$ & $12\,100$ \\
+Presupuesto $B$ (D17) & $14\,400$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Dos arranques de $P=3$ podrían sumar, en el peor caso, más que $B$. Lo que acota el gasto
+real es el contador de generaciones, que lanza \texttt{PresupuestoAgotado} al llegar a $B$.
+Lo observado fue menor y está en la sección~\ref{sec:experimentos}: el arranque 0 evaluó
+$92$ configuraciones distintas ($9\,200$ generaciones) y el arranque 1, $28$ ($2\,800$).
+
+\subsection{Cota de calidad: no hay razón de aproximación}
+
+El algoritmo garantiza el lema~\ref{lem:monotonia} y el teorema~\ref{teo:optimo-local},
+pero no una razón de aproximación respecto al óptimo.
+
+\begin{teorema}[Sin razón de aproximación]\label{teo:contraejemplo}
+No existe una constante $\alpha>0$ tal que el algoritmo~\ref{alg:coordenadas} devuelva
+siempre $c$ con $\Acc(c)\ge\alpha\,\Acc(c^*)$, donde $c^*$ es un óptimo.
+\end{teorema}
+\begin{proof}
+Sean $L=2$ ranuras con dos opciones cada una, y un lote de $n$ instancias idénticas en el
+que cumplir la instancia exige dos condiciones: una la satisface solo la opción $1$ de la
+ranura 1 y la otra, solo la opción $1$ de la ranura 2. Por el puntaje todo-o-nada,
+$\Acc(1,1)=1$ y $\Acc(c)=0$ para las otras tres configuraciones. Si el punto de partida es
+$(0,0)$, sus dos vecinos tienen precisión $0$, no hay mejora estricta y el algoritmo termina
+en $(0,0)$ con $\Acc=0$, frente a $\Acc(c^*)=1$. La cantidad de ranuras y opciones del
+proyecto solo agrega ranuras irrelevantes y no altera este argumento.
+\end{proof}
+
+Este es un ejemplo construido en el modelo, no una observación con el modelo real. Lo que
+lo hace posible es el puntaje todo-o-nada, que crea mesetas donde ningún vecino mejora. Lo
+que sí se observó con el modelo real va en la misma dirección: dos arranques con puntos de
+partida y espacios distintos terminaron en 20\,\% y 17\,\% (sección~\ref{sec:experimentos}),
+y la mejor opción de estilo depende de la estrategia elegida. Por eso el riesgo de quedar
+en un óptimo local se mide con varios arranques y no se declara cubierto.
+
+\subsection{Qué no se afirma}
+
+\begin{itemize}
+  \item No se afirma que la configuración encontrada sea un óptimo global ni del
+  subcatálogo. Es la mejor encontrada.
+  \item No hay garantía probabilística de haber hallado el óptimo: el análisis de muestreo
+  de la sección~\ref{sec:reduccion} muestra que una garantía uniforme sobre todo el espacio
+  es inviable con este presupuesto.
+  \item La precisión de búsqueda es la de un lote fijo de $100$ instancias y no se extiende
+  sin supuestos a otras instancias.
+\end{itemize}

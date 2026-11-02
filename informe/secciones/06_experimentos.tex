@@ -2,6 +2,257 @@
 \section{Proceso de optimización y resultados}
 \label{sec:experimentos}
 
-% Método, parámetros y parada, configuración final, precisión, trazas y descartes, con
-% referencias al notebook de búsqueda. Validación con oraculo.validar, datos privados
-% fuera de alcance y límites. Barridos, gráficas y contraste con T(n).
+Esta sección describe la búsqueda real que produjo \texttt{entrega.json}, con el modelo
+\texttt{qwen17b}. Cada resultado remite a la celda del notebook de búsqueda
+(\texttt{notebooks/busqueda.ipynb}, secciones B1 a B7) o a un archivo de
+\texttt{resultados/}. Lo comprobado y lo que es hipótesis se distinguen en cada caso. En
+todo el texto, \emph{mejor encontrada} no significa óptima.
+
+\subsection{Método, parámetros y parada}
+
+Se usó una sola técnica, la búsqueda por coordenadas de la sección~\ref{sec:aproximados}
+(D3), con dos arranques de puntos de partida distintos. No se compararon otros métodos con
+el modelo real.
+
+\begin{center}
+\begin{tabular}{p{0.38\textwidth}p{0.52\textwidth}}
+\toprule
+Parámetro & Valor \\
+\midrule
+Modelo, temperatura, semilla & \texttt{qwen17b}, $0{,}0$, semilla $1$ (D2) \\
+Espacio & 5 ranuras de 8 opciones, $|\conf|=32\,768$ \\
+Lote de búsqueda & 100 instancias de \texttt{datos\_visibles.json} \\
+Presupuesto & $B=14\,400$ generaciones nuevas (D11, D17) \\
+Tope de pasadas & $P=3$ en los dos arranques (propuesta D18, pendiente de aprobación) \\
+Orden de ranuras & Arranque 0: rol, estrategia, formato, estilo, cierre. Arranque 1: formato, rol, estilo, estrategia, cierre \\
+Criterio de aceptación & Mejora estricta de la precisión; en empate se conserva la actual \\
+Caché & Se guarda en Drive; no se cobra una (configuración, instancia, semilla) ya generada \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+La decisión D17 fijaba hasta dos pasadas por arranque. El arranque 0 usó una tercera como
+verificación y quedó dentro de $B$; por eso el tope se propone en tres. La propuesta aún no
+la aprobó el equipo.
+
+\paragraph{Condición de parada} (celda B4). Un arranque termina por la primera de estas
+causas: una pasada completa sin cambios aceptados (convergencia, óptimo local por ranura,
+teorema~\ref{teo:optimo-local}); llegar a $P$ pasadas; o agotar $B$, caso en que se
+devuelve la mejor configuración vista. Los dos arranques pararon por convergencia.
+
+\paragraph{Reproducibilidad.} El punto de partida de cada arranque lo fija una semilla.
+Cada paso se escribe en un CSV (\texttt{resultados/busqueda/historial\_arranque\_*.csv}) con
+la configuración, su precisión, la mejor hasta ahí, las generaciones acumuladas y la
+decisión (acepta o descarta). La celda B6 recalcula desde esos CSV los conteos y falla si no
+coinciden con los registrados.
+
+\subsection{Registro de las evaluaciones}
+
+\begin{center}
+\begin{tabular}{p{0.36\textwidth}p{0.25\textwidth}p{0.25\textwidth}}
+\toprule
+ & Arranque 0 & Arranque 1 \\
+\midrule
+Punto de partida (rol, estr., formato, estilo, cierre) & 3, 0, 6, 7, 2 & 6, 7, 0, 4, 3 \\
+Precisión de partida & 3\,\% & 9\,\% \\
+Configuración final & 1, 1, 3, 3, 3 & 1, 7, 3, 5, 3 \\
+Precisión final (búsqueda) & 20\,\% & 17\,\% \\
+Pasadas & 3 (la tercera sin cambios) & 2 (la segunda sin cambios) \\
+Configuraciones distintas evaluadas & 92 & 28 \\
+Generaciones (distintas $\times$ 100) & $9\,200$ & $2\,800$ \\
+Cambios aceptados & 8 & 4 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Los cambios aceptados fueron, en orden, con la precisión que alcanzó cada uno:
+
+\begin{itemize}
+  \item Arranque 0: rol 0 (6\,\%), rol 1 (8\,\%), estrategia 1 (9\,\%), estrategia 4
+  (10\,\%), formato 3 (11\,\%), cierre 3 (15\,\%), estrategia 1 (19\,\%) y estilo 3
+  (20\,\%). La estrategia pasó de 1 (paso 10) a 4 (paso 13) en la primera pasada y volvió
+  a 1 en el paso 47, de la segunda, cuando ya habían cambiado formato y cierre: la mejor
+  opción de una ranura depende de lo que valen las demás.
+  \item Arranque 1: formato 3 (12\,\%), rol 1 (13\,\%), estilo 0 (15\,\%) y estilo 5
+  (17\,\%).
+\end{itemize}
+
+Las ocho mejores configuraciones de la unión de los dos arranques, por precisión sobre el
+lote de búsqueda:
+
+\begin{center}
+\begin{tabular}{rccccc}
+\toprule
+Precisión & rol & estrategia & formato & estilo & cierre \\
+\midrule
+20\,\% & 1 & 1 & 3 & 3 & 3 \\
+19\,\% & 1 & 1 & 3 & 7 & 3 \\
+19\,\% & 1 & 1 & 6 & 7 & 3 \\
+17\,\% & 1 & 1 & 3 & 0 & 3 \\
+17\,\% & 1 & 1 & 3 & 5 & 3 \\
+17\,\% & 1 & 4 & 3 & 3 & 3 \\
+17\,\% & 1 & 7 & 3 & 5 & 3 \\
+16\,\% & 1 & 2 & 3 & 7 & 3 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Las ocho comparten rol 1 y cierre 3, y siete de ocho comparten formato 3. Con $100$
+instancias, la desviación típica de una proporción cercana a $0{,}15$ es de unos $3{,}6$
+puntos (raíz de $0{,}15\cdot0{,}85/100$). Es una estimación teórica, no medida entre
+semillas: diferencias de uno a tres puntos no distinguen configuraciones.
+
+\paragraph{Presupuesto gastado.} Como el caché no cobra lo ya generado, el gasto real es el
+de la unión de configuraciones, no la suma de los dos arranques: $117$ configuraciones,
+$11\,700$ generaciones, el 81{,}25\,\% de $B$. Los dos arranques compartieron tres
+configuraciones, de modo que la suma por sesión es $12\,000$. Que el caché evitara repetirlas
+es una inferencia, porque el CSV no registra aciertos de caché. Aparte quedan $20$
+generaciones de pruebas del caché y $11$ de un diagnóstico hecho en otra cuenta; si se
+cuentan, el total es $11\,731$ (81{,}5\,\%). La validación ($87$) no entra en $B$. En
+cualquier lectura el gasto queda por debajo de $14\,400$.
+
+\subsection{Trazas de fallos y decisiones derivadas}
+
+Tras el arranque 0 se analizó en qué instancias fallaba su mejor configuración
+($80$ de $100$), por familia de restricción y por la primera restricción violada, y con eso
+se recortó el espacio del arranque 1 (celdas B5; \texttt{resultados/busqueda/fallos\_*.txt}
+y \texttt{analisis\_busqueda.md}). Con la mejor encontrada de cada arranque, $27$ familias
+fallan siempre y $23$ de ellas son comunes; las primeras restricciones violadas más
+frecuentes también coinciden (\texttt{last\_word:last\_word\_sent}, \texttt{copy:copy} y
+\texttt{new:copy\_span\_idx}).
+
+\begin{center}
+\begin{tabular}{p{0.11\textwidth}p{0.17\textwidth}p{0.30\textwidth}p{0.28\textwidth}}
+\toprule
+Ranura & Excluidas en el arranque 1 & Fundamento & Estado \\
+\midrule
+rol & 0, 3, 4, 7 & Fijan una primera línea literal (leído del catálogo); se supuso que chocan con \texttt{first\_word} & La primera línea literal está comprobada. El choque es hipótesis: con el caché, esas opciones aciertan $0$ o $1$ de $11$ instancias de \texttt{first\_word\_answer}, frente a $3$ de $11$ con rol 1; es una tendencia con $11$ casos \\
+formato & 1, 4, 5 & Nunca pasaron de 10\,\% en el arranque 0 & Contrastado con el historial \\
+estrategia & 3 & Nunca pasó de 10\,\% en las pasadas 1 y 2 & \textbf{No se sostuvo}: en la pasada 3 llegó a 15\,\% \\
+cierre & todas menos la 3 & La 3 es la única que no agrega texto tras la respuesta & Comprobado con el catálogo. Que por eso supere a las demás (20\,\% frente a 13\,\% como máximo) es hipótesis \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Con esas exclusiones el arranque 1 buscó en $4\cdot5\cdot7\cdot8\cdot1=1\,120$ de las
+$32\,768$ configuraciones (3{,}4\,\%). En el contexto final del arranque 0, ninguna opción
+excluida superó el 15\,\% frente al 20\,\%, así que las exclusiones no habrían cambiado
+su mejor; eso se midió solo en ese contexto.
+
+\paragraph{Vecindad completa del arranque 1 (experimento posterior).} Tras congelar la
+configuración se evaluaron los $35$ vecinos por una ranura de la mejor del arranque 1
+(rol 1, estrategia 7, formato 3, estilo 5, cierre 3, 17\,\%), sin las exclusiones. Los $20$
+ya evaluados salieron del caché; los $15$ restantes costaron a lo sumo $1\,500$ generaciones,
+hechas en otra cuenta de Colab con una copia del caché y fuera del conteo de $11\,700$ de la
+búsqueda (con ellas el total no pasaría de $13\,200$, dentro de $B$). Resultado:
+ningún vecino supera al 17\,\% y el máximo es 17\,\%, un empate con la estrategia 1, que ya
+estaba en el historial. Entre las $15$ opciones antes excluidas el máximo fue 14\,\%
+(rol 3), con rol 0, 4 y 7 entre 10\,\% y 13\,\%, formato 1, 4 y 5 entre 8\,\% y 9\,\%,
+estrategia 3 en 12\,\% y cierre entre 8\,\% y 13\,\%. Por tanto, el 17\,\% del arranque 1
+es un óptimo local por ranura completo y no solo respecto del subespacio permitido, y las
+exclusiones no ocultaban ninguna mejora en ese punto. Se confirma que la premisa de la
+estrategia 3 era falsa, aunque no cambió el resultado. Esto no modifica la configuración
+entregada (20\,\%), y no es evidencia independiente de que ninguna de las dos sea un
+óptimo global.
+
+\paragraph{Qué se descartó y qué cambió.} Las opciones de la tabla se descartaron por esta
+evidencia, y el arranque 1 se dedicó a la región restante. El resultado fue distinto: una
+interacción entre estrategia y estilo. Con rol 1, formato 3 y cierre 3, la estrategia 1 da
+20\,\% con el estilo 3 y 17\,\% con el 5, y la estrategia 7 da 11\,\% con el estilo 3
+y 17\,\% con el 5. Esa dependencia ya anticipaba un óptimo local según el punto de
+partida; es lo que ilustran los dos arranques.
+
+\paragraph{Lo que las trazas no permiten concluir.} La frase \emph{``Before each part of the
+answer\dots''} pertenece al texto de la estrategia 7 (comprobado en el catálogo) y aparece
+en los primeros $300$ caracteres de $32$ de los $83$ fallos del arranque 1 y en $0$ de los
+$80$ del arranque 0. No se sabe cuántas de las $17$ salidas acertadas la contienen, así que
+que cause los fallos es una hipótesis. Tampoco hay datos por familia de las otras $115$
+configuraciones evaluadas: ninguna fila del análisis demuestra que una opción cause un
+fallo. Las familias de copia (\texttt{copy:copy}, \texttt{new:copy\_span\_idx}) acertaron
+$0$ de $11$ con cuatro vecinos y $1$ de $11$ con una configuración sin añadidos; la
+hipótesis de que el texto de las opciones, que forma parte del prompt, se copie junto con
+el enunciado no está comprobada.
+
+\subsection{Validación final}
+
+La configuración se congeló el 1 de noviembre de 2026 por una regla fijada antes de validar:
+la de mayor precisión en búsqueda entre las mejores de cada arranque (20\,\% frente a
+17\,\%). Esa diferencia de tres puntos está dentro del ruido; la elección sale de la
+regla, no de una diferencia demostrada. Quedó con el registro y las huellas de los archivos
+fuente en \texttt{docs/bitacora/2026-10.md} y con la etiqueta \texttt{config-congelada}.
+
+Después se invocó \texttt{oraculo.validar(config, n=None)} \textbf{una sola vez} (celda B7;
+copia ejecutada en \texttt{resultados/validacion/busqueda\_validado\_2026-11-01.ipynb}). El
+resultado fue:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Configuración & rol 1, estrategia 1, formato 3, estilo 3, cierre 3, temperatura $0{,}0$ \\
+Precisión de búsqueda & 20{,}0\,\% sobre $100$ instancias \\
+Precisión de validación & 18{,}4\,\% sobre $87$ instancias ($16$ aciertos) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Los $16$ aciertos son un cálculo propio ($0{,}184\cdot87$); la salida del notebook solo
+imprime el porcentaje. Las familias con más fallos, por primera restricción violada, fueron
+\texttt{last\_word\_sent} ($6$), \texttt{punctuation\_dot} ($6$), \texttt{repeat\_phrase}
+($5$), \texttt{repeat\_prompt} ($5$), \texttt{no\_adjacent\_consecutive} ($4$),
+\texttt{letter\_counting} ($4$) y \texttt{last\_word\_answer} ($4$).
+
+\paragraph{Interpretación.} La diferencia entre búsqueda y validación es de $1{,}6$ puntos,
+dentro del ruido. Es coherente con que el 20\,\% fuera algo optimista, porque es el máximo
+entre $117$ configuraciones medidas sobre las mismas instancias, pero no lo prueba. Para una
+configuración fijada antes de mirar los datos, la desigualdad de Hoeffding
+(sección~\ref{sec:reduccion}) da con $87$ instancias un error de hasta $0{,}146$ con
+$\delta=0{,}05$; la cifra de 18{,}4\,\% es, por tanto, una estimación gruesa, compatible
+con valores entre unos 4\,\% y 33\,\%. Esa cota supone instancias independientes.
+
+\paragraph{Qué comprueba y qué no.} La validación comprueba que la configuración elegida no
+tiene un desempeño muy distinto en instancias que no intervinieron en la búsqueda. No es la
+evaluación final: el test de la docente es privado y puede traer familias de restricciones
+ausentes de los datos visibles, que quedan fuera del alcance del equipo. La validación no se
+repite ni se usa para elegir (D12).
+
+\subsection{Límites}
+
+\begin{itemize}
+  \item La configuración entregada es la mejor encontrada, un óptimo local por ranura. No se
+  afirma que sea un óptimo global ni de un subcatálogo.
+  \item El arranque 1 no es independiente del 0: usó exclusiones derivadas de sus trazas.
+  Su coincidencia en rol 1, formato 3 y cierre 3 no es evidencia independiente.
+  \item Durante la búsqueda, el 17\,\% del arranque 1 solo era óptimo local respecto del
+  subespacio permitido: de sus $35$ vecinos por una ranura se evaluaron $20$ y $15$ quedaron
+  sin evaluar por las exclusiones. Esos $15$ se evaluaron después, como experimento aparte
+  (véase arriba); no intervinieron en la elección de la configuración entregada.
+  \item La premisa de excluir la estrategia 3 resultó falsa: llegó a 15\,\% en la pasada 3
+  del arranque 0 y a 12\,\% como vecino del arranque 1. Eso no cambia la configuración
+  ganadora.
+  \item Solo hay dos arranques, y no se midió la variabilidad entre semillas.
+  \item La velocidad ($1{,}99$ s por generación) se midió con una sola configuración; otras
+  podrían tardar más.
+  \item No se hicieron los barridos de $T(n)$ con el modelo real ni con el modelo sintético
+  en esta entrega, ni el exacto sobre un subcatálogo (D17), así que no se contrasta aquí la
+  cota de la sección~\ref{sec:aproximados} con tiempos medidos.
+  \item Con las $100$ instancias de búsqueda y las $87$ de validación, los resultados de la
+  sección no generalizan sin supuestos a otras familias de restricciones.
+\end{itemize}
+
+\subsection{Dónde está cada cosa}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Elemento & Ubicación en el repositorio \\
+\midrule
+Configuración entregada & \texttt{entrega.json} (grupo ADAG1) \\
+Notebook de búsqueda & \texttt{notebooks/busqueda.ipynb}, celdas B1 a B7 \\
+Notebook de evaluación & \texttt{notebooks/evaluacion.ipynb} \\
+Historiales y resúmenes & \texttt{resultados/busqueda/} \\
+Análisis de fallos & \texttt{resultados/busqueda/analisis\_busqueda.md} \\
+Copia de la validación & \texttt{resultados/validacion/} \\
+Registro del congelamiento & \texttt{docs/bitacora/2026-10.md} \\
+\bottomrule
+\end{tabular}
+\end{center}
