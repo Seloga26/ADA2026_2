@@ -26,6 +26,8 @@ htmlcov/
 
 # Caché del oráculo
 cache_oraculo.json
+oraculo_cache.json
+oraculo_cache.json.copia
 
 # LaTeX build artifacts
 *.aux
