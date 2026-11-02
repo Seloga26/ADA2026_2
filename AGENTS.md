@@ -191,7 +191,7 @@ su interior y lanza `PresupuestoAgotado`.
 
 ## 8. Estado actual del repositorio
 
-Última actualización: domingo 2026-11-01, después de la validación y de probar la celda de parámetros. Antes de seguir, ejecuta `git fetch origin`,
+Última actualización: domingo 2026-11-01, después de subir la etiqueta `config-congelada`. Antes de seguir, ejecuta `git fetch origin`,
 `git log origin/main --oneline -5` y `git branch -r`: Dylber pudo haber subido trabajo.
 
 **Entrega:** lunes 2026-11-02 a medianoche (se asume 23:59). Corte de trabajo nuevo: lunes 20:00.
@@ -212,7 +212,7 @@ Qué hace cada uno y qué bloquea a quién: `docs/reparto_primera_entrega.md`.
 | D6: análisis de fallos | Redactado | `resultados/busqueda/analisis_busqueda.md`, sección 6, con los 40 textos de `CATALOGO` en `catalogo_opciones.txt`; los vínculos opción-fallo siguen como hipótesis |
 | D7: `notebooks/busqueda.ipynb` | Probado en Colab | Selector único (PR #6), parada y validación (PR #8) y registro B6 (PR #10) integrados. Celda de parámetros ejecutada con `ARRANQUE = 0` y `1` (imprime `pasadas: 3` y el historial de cada arranque). Celdas de instalación, carga del modelo y validación ejecutadas con GPU el 2026-11-01. B6 se probó en local, no en Colab |
 | D9: validación final | Ejecutada una vez | 18,4 % sobre 87 instancias; copia con salidas en `resultados/validacion/`, registro del 2026-11-01, 21:07 en la bitácora. Falta `entrega.json` |
-| D8: configuración congelada | Listo | Registro del 2026-11-01, 18:30 en `docs/bitacora/2026-10.md`, con huellas de los archivos fuente |
+| D8: configuración congelada | Listo | Registro del 2026-11-01, 18:30 en `docs/bitacora/2026-10.md`, con huellas de los archivos fuente. La etiqueta `config-congelada` (`6e5d003`) está en el remoto desde el 2026-11-01 y Sebastián está avisado |
 
 **Configuración congelada (tarea D8, domingo 2026-11-01, 18:30):** rol 1, estrategia 1,
 formato 3, estilo 3, cierre 3, temperatura 0.0; 20 % en las 100 instancias de búsqueda. Es la
@@ -229,21 +229,20 @@ evidencia nueva y acuerdo del equipo. Registro y huellas: `docs/bitacora/2026-10
 
 ### Pendiente de Dylber
 
-1. D8: crear y subir la etiqueta `config-congelada`; el 2026-11-01 no estaba en el remoto.
-2. D6: las pruebas con el caché ya se hicieron (sección 6.3 de `analisis_busqueda.md`).
+1. D6: las pruebas con el caché ya se hicieron (sección 6.3 de `analisis_busqueda.md`).
    La prueba de copia sin añadidos también se hizo (1 de 11 aciertan). Queda opcional
    mirar, en el caché de la cuenta original, si los 32 casos de la frase de `estrategia 7`
    se concentran en instancias de copia.
-3. D9: la validación ya se ejecutó (domingo 2026-11-01, 9:07 pm): 18,4 % sobre 87
+2. D9: la validación ya se ejecutó (domingo 2026-11-01, 9:07 pm): 18,4 % sobre 87
    instancias; no se repite. Falta `entrega.json`, con grupo y semana reales.
-4. Lunes, D10 y D11: secciones 04 y 06 del informe y `docs/manual_tecnico.md`
+3. Lunes, D10 y D11: secciones 04 y 06 del informe y `docs/manual_tecnico.md`
    (la bitácora menciona un borrador, pero no está en ninguna rama remota). Al redactar, declarar que:
    - el arranque 1 no es independiente: usó exclusiones derivadas del arranque 0 y su
      columna `arranque` dice `0`;
    - su 17 % no es un óptimo local completo: 15 de 35 vecinos quedaron sin evaluar. Los 35 de la
      ganadora sí se evaluaron;
    - la premisa de esas exclusiones sobre `estrategia 3` resultó falsa: llegó a 15 %.
-5. Lunes, D12: revisar la reducción con Sebastián.
+4. Lunes, D12: revisar la reducción con Sebastián.
 
 **Plan de contingencia:** si el sábado por la noche no hay fecha clara para el primer arranque,
 o el domingo al mediodía no hay una pasada real en curso, Sebastián toma coordenadas y la búsqueda.
