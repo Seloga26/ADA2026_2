@@ -210,6 +210,7 @@ Qué hace cada uno y qué bloquea a quién: `docs/reparto_primera_entrega.md`.
 | D5: búsqueda real | Listo | Dos arranques convergidos; unión de 117 configuraciones y 11 700 generaciones de B = 14 400 (`resultados/busqueda/`, `resumir.py`) |
 | D6: análisis de fallos | Redactado | `resultados/busqueda/analisis_busqueda.md`, sección 6, con los 40 textos de `CATALOGO` en `catalogo_opciones.txt`; los vínculos opción-fallo siguen como hipótesis |
 | D7: `notebooks/busqueda.ipynb` | Listo, falta probarlo en Colab | Selector único (PR #6) y celdas de parada y validación (PR #8) integrados en `main`; la celda de validación no se ha ejecutado |
+| D9: validación final | Ejecutada una vez | 18,4 % sobre 87 instancias; copia con salidas en `resultados/validacion/`, registro del 2026-11-01, 21:07 en la bitácora. Falta `entrega.json` |
 | D8: configuración congelada | Listo | Registro del 2026-11-01, 18:30 en `docs/bitacora/2026-10.md`, con huellas de los archivos fuente |
 
 **Configuración congelada (tarea D8, domingo 2026-11-01, 18:30):** rol 1, estrategia 1,
@@ -239,7 +240,8 @@ evidencia nueva y acuerdo del equipo. Registro y huellas: `docs/bitacora/2026-10
    La prueba de copia sin añadidos también se hizo (1 de 11 aciertan). Queda opcional
    mirar, en el caché de la cuenta original, si los 32 casos de la frase de `estrategia 7`
    se concentran en instancias de copia.
-4. Lunes, D9: `oraculo.validar` **una sola vez** y `entrega.json`, con grupo y semana reales.
+4. D9: la validación ya se ejecutó (domingo 2026-11-01, 9:07 pm): 18,4 % sobre 87
+   instancias; no se repite. Falta `entrega.json`, con grupo y semana reales.
 5. Lunes, D10 y D11: secciones 04 y 06 del informe y `docs/manual_tecnico.md`
    (hay un borrador sin integrar, con `PENDIENTE`).
 6. Lunes, D12: revisar la reducción con Sebastián.
