@@ -2,4 +2,66 @@
 \section{Discrepancias y limitaciones}
 \label{sec:discrepancias}
 
-% Tabla de discrepancias de docs/plan.md, sección 2, y límites de los resultados.
+\subsection{Discrepancias entre las fuentes}
+
+El repositorio base manda en datos y ejecución; el enunciado, en entregables, pesos y rigor
+(D1). La guía de la primera entrega manda sobre el enunciado en esta entrega y en la
+reducción (D13). La tabla registra las diferencias y la decisión tomada en cada caso.
+
+\begin{center}
+\small
+\begin{tabular}{p{2.5cm}p{4cm}p{4cm}p{3.5cm}}
+\toprule
+Tema & Enunciado & Repositorio base & Decisión \\
+\midrule
+$|\conf|$ & 3840 y 144; con temperatura, 432 & 32\,768; con temperatura, 98\,304 & 32\,768 (D2) \\
+Opciones por categoría & $k_{\max}=4$, con máximo $4^5=1024$ & 8 por ranura & 8 (D2) \\
+Instancias & $n=150$ & 100 de búsqueda y 87 de validación & $n=100$ (D2) \\
+Categorías & Rol, Estrategia, Formato, Verificación, Recordatorio & \texttt{rol}, \texttt{estrategia}, \texttt{formato}, \texttt{estilo}, \texttt{cierre} & Las del repositorio (D1) \\
+Instancias sintéticas & Todas sintéticas & Modelo real en Colab & Ambas, con funciones distintas (D7) \\
+Exacto & Fuerza bruta o programación dinámica en el cronograma; backtracking en §4.3 & Sin definir & Backtracking, con fuerza bruta como referencia (D3) \\
+Reducción & Cobertura Máxima & La guía indica 3-SAT & 3-SAT (D9, D13) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Otras inconsistencias comprobadas:
+
+\begin{itemize}
+  \item Según \texttt{datos\_visibles.json}, hay 100 instancias de búsqueda, 87 de validación
+    y 263 descartadas, aunque el cuaderno del repositorio base menciona 150 y 300. Se usan
+    los valores del archivo.
+  \item La fórmula de Successive Halving solo es exacta si $|\conf|$ es potencia de 2.
+  \item Con 5 categorías fijas, $|\conf|$ es constante y el problema es polinomial. Por eso
+    $L$ y los $k_i$ son parte de la entrada de la reducción (D9).
+  \item La fórmula de coordenadas omite $L$ porque lo toma constante; con $L$ variable,
+    $T=O(I\cdot L\cdot k_{\max}\cdot n)$.
+  \item D17 fijó hasta 2 pasadas por arranque, pero el arranque 0 usó una tercera como
+    verificación. El gasto total, 11\,700 generaciones de la unión, quedó dentro de $B$.
+\end{itemize}
+
+\subsection{Limitaciones de los resultados}
+
+\begin{itemize}
+  \item \textbf{Alcance de la configuración elegida.} Es un óptimo local por ranura: se
+    evaluaron sus 35 vecinos que difieren en una sola ranura y ninguno la supera. No se
+    afirma que sea un óptimo global ni el óptimo de un subcatálogo.
+  \item \textbf{Sesgo de selección.} El 20\,\% es el máximo entre 117 configuraciones medidas
+    sobre las mismas 100 instancias, así que probablemente es optimista. La cifra sin ese
+    sesgo es la de validación (Sección~\ref{sec:experimentos}).
+  \item \textbf{Ruido.} La diferencia con el arranque 1 (3 puntos) está dentro de un ruido
+    estimado en unos 4 puntos con 100 instancias. Esa estimación es teórica, no una medición
+    entre semillas, y la elección sale de una regla fijada antes de validar.
+  \item \textbf{Arranques no independientes.} El arranque 1 usó exclusiones derivadas del
+    arranque 0, de modo que no mide el riesgo de óptimos locales como lo haría una repetición
+    independiente. En su archivo de historial, la columna \texttt{arranque} dice 0.
+  \item \textbf{Mejor configuración del arranque 1.} Su 17\,\% no es un óptimo local completo:
+    15 de sus 35 vecinos no se evaluaron por esas exclusiones.
+  \item \textbf{Una premisa falsa.} Una de las exclusiones suponía que la opción 3 de
+    \texttt{estrategia} nunca pasaba de 10\,\%, pero alcanzó 15\,\% en la tercera pasada del
+    arranque 0. Esto no cambia la configuración elegida.
+  \item \textbf{Vínculos entre opciones y fallos.} Siguen siendo hipótesis, no relaciones
+    causales demostradas.
+  \item \textbf{Datos privados.} Pueden traer familias de restricciones que no están en los
+    datos visibles, de modo que la precisión de esta entrega no anticipa la de ese conjunto.
+\end{itemize}

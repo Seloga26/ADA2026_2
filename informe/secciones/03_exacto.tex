@@ -2,4 +2,15 @@
 \section{Algoritmo exacto}
 \label{sec:exacto}
 
-% Backtracking: pseudocódigo, cota, correctitud y deducción de T(n).
+Esta sección no se desarrolla en la primera entrega. El backtracking con cota, su
+correctitud y la deducción de $T(n)$ quedan para una etapa posterior del proyecto.
+
+Lo que sí se delimitó es el costo que justifica esa decisión. Recorrer todo el espacio con
+el modelo real exigiría $|\conf|\cdot n=32\,768\cdot 100=3\,276\,800$ generaciones, frente
+al presupuesto de $B=14\,400$ de esta entrega. La cota prevista para el backtracking
+abandona una configuración cuando sus aciertos más las instancias restantes no alcanzan a
+la mejor conocida (D5), pero su peor caso sigue siendo $O(|\conf|\cdot n)$.
+
+El repositorio incluye una fuerza bruta que se ejecuta sobre el modelo sintético. Sirve como
+referencia para las pruebas y no produce ningún resultado de precisión con el modelo real.
+Por eso este informe no afirma haber hallado el óptimo global ni el de un subcatálogo.

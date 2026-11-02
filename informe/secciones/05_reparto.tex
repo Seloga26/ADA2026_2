@@ -2,4 +2,26 @@
 \section{Comparación de reparto del presupuesto}
 \label{sec:reparto}
 
-% Uniforme frente a UCB1 y descarte de Successive Halving con sus números.
+La comparación entre el reparto uniforme y UCB1~\cite{auer2002} no se desarrolla en la
+primera entrega: ninguno de los dos está implementado y no hay resultados que reportar.
+
+Successive Halving se descartó y no se implementa (D4). La tabla compara su costo sobre
+$|\conf|=32\,768$ con el de otras estrategias, en generaciones.
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+Estrategia & Generaciones \\
+\midrule
+Fuerza bruta con $n=100$ & $3\,276\,800$ \\
+Successive Halving según la fórmula, $n_0=2$ & $983\,040$ \\
+Successive Halving con tope $n=100$ & $495\,416$ \\
+Successive Halving con tope y caché & $247\,808$ \\
+Una pasada de coordenadas & $\le 4\,000$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Incluso su variante más barata supera con holgura a $B=14\,400$. Además, una configuración
+al azar suele quedar por debajo del 5\,\% y el puntaje es todo-o-nada, así que con $n_0=2$
+casi todas marcarían 0\,\% y no se podrían separar.

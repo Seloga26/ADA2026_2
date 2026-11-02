@@ -221,12 +221,10 @@ evidencia nueva y acuerdo del equipo. Registro y huellas: `docs/bitacora/2026-10
 
 ### Pendiente de Sebastián
 
-1. Rehacer la reducción en papel, sin mirar; se defiende sin notas.
-2. Verificar en la fuente las citas de `informe/referencias.bib` (Karp, Hoeffding, Auer).
-3. Lunes: S11 conectar el `entrega.json` definitivo, S13 integrar `informe/main.tex` antes de
+1. Lunes: S11 conectar el `entrega.json` definitivo, S13 integrar `informe/main.tex` antes de
    las 16:00 y S14 probar desde un clon limpio.
-4. En S13, completar la sección 07 de discrepancias, que no tenía responsable (D1 y D13), y
-   declarar que las secciones 03 y 05 quedan fuera de esta entrega.
+2. Secciones 03, 05 y 07 redactadas en `docs/informe-integracion`, y citas contrastadas con
+   fuentes externas. Falta revisarlas; la 05 es de Dylber y debe aceptarla.
 
 ### Pendiente de Dylber
 
