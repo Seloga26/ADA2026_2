@@ -210,7 +210,7 @@ repositorio y el PDF del informe. `entrega.json`: grupo `ADAG1`, semana `6`, con
 | Configuración congelada | Listo | rol 1, estrategia 1, formato 3, estilo 3, cierre 3, temperatura 0.0; etiqueta `config-congelada` (`6e5d003`) |
 | `entrega.json` | Listo | En `main`; pasa `cargar_entrega` |
 | `notebooks/busqueda.ipynb` | Listo | Probado en Colab; guarda la salida real de B6 y el resultado de la validación, que remite a `resultados/validacion/` |
-| `notebooks/evaluacion.ipynb` | Probado con datos de prueba | Falta la prueba S14 con `main` final |
+| `notebooks/evaluacion.ipynb` | Listo (S14) | 2026-11-05: Colab limpio con T4 sobre `main` en `e964219`; corrieron todas las celdas sin editar, con 8 instancias de búsqueda como datos de prueba (0 de 8 aciertos). El ejemplo del README y las 174 pruebas también pasaron en ese clon |
 | Exacto (B5) | Listo con el sintético | `backtracking.py` con cota D5 y cota estructural; barridos en `resultados/exacto/`; sección 03. Con el modelo real no se ejecutó |
 | Informe | Compila sin advertencias | Secciones 01 a 07, ficha de identificación y anexo de decisiones; 18 páginas |
 | Manual técnico | Listo | `docs/manual_tecnico.md`, enlazado desde el README |
@@ -221,10 +221,8 @@ bitácora, registro del 2026-11-05.
 
 ### Pendiente antes de entregar (Sebastián)
 
-1. Push de `docs/cierre-entrega`, PR e integración en `main`.
-2. S14: clon limpio en Colab sobre `main` final; correr el ejemplo y `notebooks/evaluacion.ipynb`.
-3. Versionar el PDF en el último commit y crear la etiqueta `primera-entrega`; push de la etiqueta.
-4. Entregar el enlace y el PDF.
+1. Crear la etiqueta `primera-entrega` y subirla.
+2. Entregar el enlace y `informe/informe_primera_entrega.pdf`.
 
 ### Pendiente después de la entrega
 
