@@ -1,0 +1,41 @@
+%% Responsable: Sebastián López
+\section*{Anexo: decisiones citadas}
+\addcontentsline{toc}{section}{Anexo: decisiones citadas}
+\label{sec:decisiones}
+
+El texto cita entre paréntesis las decisiones del proyecto por su identificador (D1,
+D2, \dots). Se tomaron antes de ejecutar y no cambian sin evidencia nueva. La tabla
+resume las citadas; la lista completa, con su justificación, está en el repositorio
+(\texttt{AGENTS.md}, sección 5).
+
+\begin{center}
+\small
+\begin{tabular}{lp{0.8\textwidth}}
+\toprule
+ID & Decisión \\
+\midrule
+D1 & El repositorio base manda en datos y ejecución; el enunciado, en entregables, pesos y
+rigor. Las diferencias se registran en la sección~\ref{sec:discrepancias}. \\
+D2 & $L=5$, $k_i=8$, $|\conf|=32\,768$, $n=100$, validación con 87 instancias,
+temperatura $0{,}0$, modelo \texttt{qwen17b} y semilla 1. \\
+D3 & Técnicas elegidas: backtracking, búsqueda por coordenadas y reparto uniforme frente a
+UCB1. \\
+D4 & Successive Halving no se implementa: su costo supera el presupuesto y con pocas
+instancias iniciales casi todas las configuraciones darían 0\,\%. \\
+D5 & Cota del exacto: aciertos más instancias restantes; si no alcanza a la mejor, se
+abandona la configuración. \\
+D7 & El exacto se mide con el modelo sintético; el modelo real da los resultados de
+precisión. \\
+D9 & Reducción desde 3-SAT en su versión de decisión, con $L$ y $k_i$ como parte de la
+entrada. \\
+D11 & $B$ cuenta las generaciones nuevas por (configuración, instancia, semilla). \\
+D12 & La validación con 87 instancias se usa una sola vez, sobre la configuración ya
+elegida. \\
+D13 & La guía de la primera entrega manda sobre el enunciado en esta entrega y en la
+reducción. \\
+D17 & Búsqueda real con $B=14\,400$ generaciones y dos arranques. \\
+D18 & Propuesta, pendiente de aprobación: tope de tres pasadas por arranque, que se usó
+en los dos arranques (D17 preveía dos). \\
+\bottomrule
+\end{tabular}
+\end{center}
