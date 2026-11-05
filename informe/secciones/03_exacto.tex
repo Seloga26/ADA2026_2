@@ -2,15 +2,182 @@
 \section{Algoritmo exacto}
 \label{sec:exacto}
 
-Esta sección no se desarrolla en la primera entrega. El backtracking con cota, su
-correctitud y la deducción de $T(n)$ quedan para una etapa posterior del proyecto.
+El exacto es un backtracking con cota (D3, D5). Está en el módulo
+\texttt{backtracking.py} de \texttt{busqueda\_prompt/algoritmos}, se comprobó contra la fuerza bruta y
+se midió con el modelo sintético (D7). Con el modelo real no se ejecutó: esta sección no
+reporta ninguna precisión real ni afirma un óptimo global o de un subcatálogo.
 
-Lo que sí se delimitó es el costo que justifica esa decisión. Recorrer todo el espacio con
-el modelo real exigiría $|\conf|\cdot n=32\,768\cdot 100=3\,276\,800$ generaciones, frente
-al presupuesto de $B=14\,400$ de esta entrega. La cota prevista para el backtracking
-abandona una configuración cuando sus aciertos más las instancias restantes no alcanzan a
-la mejor conocida (D5), pero su peor caso sigue siendo $O(|\conf|\cdot n)$.
+\subsection{Descripción}
 
-El repositorio incluye una fuerza bruta que se ejecuta sobre el modelo sintético. Sirve como
-referencia para las pruebas y no produce ningún resultado de precisión con el modelo real.
-Por eso este informe no afirma haber hallado el óptimo global ni el de un subcatálogo.
+El árbol de búsqueda tiene un nivel por ranura: un nodo de nivel $\ell$ es una asignación
+parcial de las ranuras $1,\dots,\ell$ y sus hijos prueban las $k_{\ell+1}$ opciones de la
+siguiente, en orden creciente. Las hojas son las configuraciones de $\conf$, recorridas en
+orden lexicográfico, el mismo de la fuerza bruta. En cada hoja la configuración se evalúa
+instancia por instancia, y se lleva la mejor cantidad de aciertos conocida, $a^*$.
+
+\begin{algorithm}[h]
+\caption{Backtracking con cota}
+\label{alg:backtracking}
+\begin{algorithmic}[1]
+\Require ranuras $1,\dots,L$ con $k_i$ opciones, lote $I=(x_1,\dots,x_n)$, cota parcial $U$ opcional
+\State $a^*\gets-1$;\quad $c^*\gets$ ninguna
+\Procedure{Explorar}{$\ell$, $p$} \Comment{$p$ asigna las ranuras $1,\dots,\ell$}
+  \If{$\ell=L$}
+    \State $a\gets 0$
+    \For{$j=1,\dots,n$}
+      \If{$a+(n-j+1)\le a^*$} \Return \Comment{cota D5: no puede superar a $c^*$}
+      \EndIf
+      \If{$p$ cumple $x_j$} $a\gets a+1$ \Comment{una generación}
+      \EndIf
+    \EndFor
+    \If{$a>a^*$} $a^*\gets a$;\quad $c^*\gets p$
+    \EndIf
+    \State \Return
+  \EndIf
+  \If{$U$ dada, $\ell>0$, $a^*\ge0$ y $U(p)\le a^*$} \Return \Comment{poda por estructura (D6)}
+  \EndIf
+  \For{$o=0,\dots,k_{\ell+1}-1$}
+    \State \Call{Explorar}{$\ell+1$, $p\cup\{\ell+1\mapsto o\}$}
+  \EndFor
+\EndProcedure
+\State \Call{Explorar}{$0$, $\varnothing$};\quad \Return $c^*$, $a^*/n$
+\end{algorithmic}
+\end{algorithm}
+
+La cota D5 no supone nada del oráculo: una instancia aún no evaluada aporta a lo sumo un
+acierto, así que $a+(n-j+1)$ acota los aciertos finales de la configuración. Vale con el
+modelo real y con el sintético, con o sin ruido.
+
+La cota parcial $U$ solo se usa con el modelo sintético, donde la estructura de reglas es
+conocida (D6). Para una asignación parcial $p$, las reglas alcanzables son las de las
+opciones elegidas más todas las de las ranuras libres; $U(p)$ cuenta las instancias cuyas
+reglas exigidas están todas en ese conjunto. Ninguna configuración que complete $p$ cubre una
+regla fuera de él, y los conflictos solo quitan reglas, así que $U(p)$ es una cota superior.
+Con ruido deja de valer y el código la rechaza. Con el modelo real no hay un $\sigma$ conocido
+y no se poda con supuestos.
+
+\subsection{Correctitud}
+
+\begin{teorema}[Correctitud]\label{teo:exacto-correcto}
+Si $U$ es una cota superior válida, o no se usa, el algoritmo~\ref{alg:backtracking}
+devuelve la primera configuración del orden lexicográfico con la mayor precisión, la misma
+que la fuerza bruta.
+\end{teorema}
+\begin{proof}
+Sea $c^\circ$ la primera configuración del orden con el máximo de aciertos $a^\circ$. Toda
+configuración anterior tiene menos de $a^\circ$ aciertos, de modo que al llegar a $c^\circ$
+se cumple $a^*<a^\circ$. La cota D5 no la abandona: en cada paso $j$, sus aciertos finales
+cumplen $a^\circ\le a+(n-j+1)$, y por tanto $a+(n-j+1)>a^*$. Ningún ancestro de $c^\circ$
+se poda por $U$: si $p$ es ancestro, $U(p)\ge a^\circ>a^*$. Entonces $c^\circ$ se evalúa
+completa y pasa a ser $c^*$. Después, ninguna configuración tiene más de $a^\circ$ aciertos y
+el reemplazo exige $a>a^*$, así que $c^*$ ya no cambia. Las configuraciones que se
+abandonan o se podan no podían superar estrictamente a $a^*$, así que no se pierde ninguna
+que la fuerza bruta habría elegido.
+\end{proof}
+
+Las pruebas de \texttt{tests/test\_backtracking.py} comprueban el teorema: en 70 instancias
+sintéticas, con conflictos, con ruido y con la cota estructural, la ganadora y la precisión
+coinciden con las de la fuerza bruta. También comprueban, en 10 casos sintéticos, que $U$ nunca
+queda por debajo de los aciertos reales en ninguna asignación parcial.
+
+\subsection{Costo $T(n)$}
+
+El costo se mide en generaciones, como en la sección~\ref{sec:aproximados}: cada vez que se
+pregunta si $p$ cumple $x_j$ se hace una generación (D11).
+
+\begin{teorema}[Costo]\label{teo:exacto-costo}
+El algoritmo~\ref{alg:backtracking} hace a lo sumo $|\conf|\cdot n$ generaciones, y esa cota
+se alcanza. Visita a lo sumo $\sum_{\ell=0}^{L}\prod_{i\le\ell}k_i$ nodos, que es menos de
+$2|\conf|$ si todo $k_i\ge2$. Sin $U$, el tiempo total es $O(|\conf|\cdot(n+L))$, y el
+número de generaciones es $\Theta(|\conf|\cdot n)$ en el peor caso.
+\end{teorema}
+\begin{proof}
+Cada hoja evalúa a lo sumo sus $n$ instancias y hay $|\conf|$ hojas. Para el número de nodos,
+el nivel $\ell$ tiene $\prod_{i\le\ell}k_i\le|\conf|/2^{L-\ell}$ nodos si todo $k_i\ge2$, y la
+suma geométrica queda por debajo de $2|\conf|$. Un nodo interno cuesta $O(1)$ sin $U$, y una
+hoja $O(n+L)$, contando la copia de la configuración, así que el tiempo es
+$O(|\conf|\cdot(n+L))$. La cota se alcanza con un oráculo en el
+que ninguna configuración cumple ninguna instancia: $a^*$ queda en $0$ tras la primera hoja,
+y en cada hoja la condición de abandono $0+(n-j+1)\le0$ nunca se cumple, así que todas las
+hojas evalúan sus $n$ instancias.
+\end{proof}
+
+En el mejor caso, si la primera configuración cumple todo, $a^*=n$ y las demás se abandonan
+antes de su primera generación: el costo es $n$. Ambos extremos están cubiertos por pruebas
+automáticas. Con $U$, cada nodo interno suma $O(n\cdot|R|)$ operaciones sin generaciones.
+
+Con $L$ y los $k_i$ como parte de la entrada, $|\conf|=\prod_ik_i\ge2^L$ crece de forma
+exponencial, lo cual es coherente con la NP-dureza de la sección~\ref{sec:reduccion}: la poda
+mejora casos concretos, pero no cambia el peor caso. En el caso del proyecto, con $|\conf|$
+fijo en $32\,768$, el costo es lineal en $n$ con una constante enorme.
+
+\subsection{Medición con el modelo sintético}
+
+El barrido sigue D10: $|\conf|=256$ fijo (4 ranuras de 4 opciones) con
+$n\in\{10,25,50,75,100\}$, y $n=50$ fijo con $|\conf|=2^L$ para $L$ de 4 a 10. Cada punto
+promedia 5 semillas de instancias con 12 reglas, 3 reglas por instancia, densidad $0{,}2$ y 3
+conflictos. En todas las semillas el exacto coincidió con la fuerza bruta. Se ejecuta con
+\texttt{python -m busqueda\_prompt.experimentos.medir}, que escribe
+\texttt{resultados/exacto/barrido\_n.csv}, \texttt{barrido\_c.csv} y \texttt{ajuste.json}.
+
+\begin{center}
+\begin{tikzpicture}
+\begin{loglogaxis}[
+  width=0.48\textwidth, xlabel={$n$}, ylabel={generaciones},
+  title={$|\conf|=256$ fijo}, legend pos=north west, legend style={font=\scriptsize},
+  log basis x=10, log basis y=10]
+\addplot+[mark=square*] table[x=n, y=fuerza_bruta, col sep=comma]{../resultados/exacto/barrido_n.csv};
+\addplot+[mark=*] table[x=n, y=backtracking, col sep=comma]{../resultados/exacto/barrido_n.csv};
+\addplot+[mark=triangle*] table[x=n, y=backtracking_estructural, col sep=comma]{../resultados/exacto/barrido_n.csv};
+\legend{fuerza bruta, cota D5, D5 y estructural}
+\end{loglogaxis}
+\end{tikzpicture}\hfill
+\begin{tikzpicture}
+\begin{loglogaxis}[
+  width=0.48\textwidth, xlabel={$|\conf|$}, ylabel={generaciones},
+  title={$n=50$ fijo}, legend pos=north west, legend style={font=\scriptsize},
+  log basis x=2, log basis y=10]
+\addplot+[mark=square*] table[x=C, y=fuerza_bruta, col sep=comma]{../resultados/exacto/barrido_c.csv};
+\addplot+[mark=*] table[x=C, y=backtracking, col sep=comma]{../resultados/exacto/barrido_c.csv};
+\addplot+[mark=triangle*] table[x=C, y=backtracking_estructural, col sep=comma]{../resultados/exacto/barrido_c.csv};
+\legend{fuerza bruta, cota D5, D5 y estructural}
+\end{loglogaxis}
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Pendiente log-log de las generaciones & frente a $n$ & frente a $|\conf|$ \\
+\midrule
+Fuerza bruta y peor caso & $1{,}00$ & $1{,}00$ \\
+Backtracking con cota D5 & $1{,}03$ & $0{,}52$ \\
+Backtracking con D5 y cota estructural & $1{,}19$ & $0{,}28$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Lectura.} Frente a $n$, la cota D5 ahorra una fracción casi constante, entre el
+45 y el 49\,\% con $|\conf|=256$ (14\,048 frente a 25\,600 generaciones con $n=100$), y el costo sigue
+siendo lineal en $n$, como predice el teorema. Frente a $|\conf|$, el ahorro crece: con
+$|\conf|=1\,024$ la cota D5 gastó 7\,195 generaciones frente a 51\,200, porque al encontrar
+pronto una configuración con muchos aciertos casi todas las demás se abandonan tras pocas
+instancias. La cota estructural poda subárboles enteros y baja más el gasto, aunque su
+pendiente frente a $n$ es algo mayor porque su ventaja relativa es mayor con $n$ pequeño.
+
+Estas pendientes describen este generador y estos parámetros; no son una garantía. Al crecer
+$L$ con densidad fija, cada instancia se cubre con más facilidad y la precisión máxima sube,
+lo que favorece la poda, y la serie frente a $|\conf|$ no es monótona (512 gastó menos que
+256). El peor caso, que se midió con el oráculo sin aciertos, mantiene la pendiente $1$ en
+los dos ejes. Los tiempos de pared fueron de $0{,}004$ a $0{,}09$ s por ejecución y siguen a
+las generaciones; con el modelo real dominan las generaciones.
+
+\subsection{Alcance con el modelo real}
+
+Con $1{,}99$ s por generación medidos en T4, el peor caso del espacio completo serían
+$3\,276\,800$ generaciones, unos 75 días de GPU. En un subcatálogo con las 3 mejores opciones
+por ranura (243 configuraciones, D8) el peor caso serían $24\,300$ generaciones, unas 13 h, y
+con 2 por ranura (32 configuraciones), $3\,200$, cerca de 1,8 h. Ninguno se ejecutó en esta
+entrega, porque el presupuesto $B=14\,400$ se dedicó a la búsqueda por coordenadas (D17). Un
+óptimo de subcatálogo solo sería óptimo en ese subcatálogo, y el subcatálogo mismo saldría de
+la búsqueda, no de una demostración.
