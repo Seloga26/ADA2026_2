@@ -164,7 +164,7 @@ ADA2026_2/
   busqueda_prompt/        paquete propio; `oraculo` ya es un módulo de la base
     contratos.py, sintetico.py, contado.py
     algoritmos/           fuerza_bruta, backtracking, coordenadas, reparto_uniforme, ucb1
-    experimentos/         medir.py, graficar.py
+    experimentos/         medir.py (las gráficas las dibuja LaTeX con pgfplots)
   entrega.json
   notebooks/              medicion_velocidad.ipynb, busqueda.ipynb, evaluacion.ipynb
   tests/
@@ -191,81 +191,58 @@ su interior y lanza `PresupuestoAgotado`.
 
 ## 8. Estado actual del repositorio
 
-Última actualización: domingo 2026-11-01, después de subir la etiqueta `config-congelada`. Antes de seguir, ejecuta `git fetch origin`,
-`git log origin/main --oneline -5` y `git branch -r`: Dylber pudo haber subido trabajo.
+Última actualización: jueves 2026-11-05, cierre de la primera entrega en `docs/cierre-entrega`.
+Antes de seguir, ejecuta `git fetch origin`, `git log origin/main --oneline -5` y `git branch -r`:
+Dylber pudo haber subido trabajo.
 
-**Entrega:** lunes 2026-11-02 a medianoche (se asume 23:59). Corte de trabajo nuevo: lunes 20:00.
-Qué hace cada uno y qué bloquea a quién: `docs/reparto_primera_entrega.md`.
+**Entrega:** viernes 2026-11-06 (se movió desde el lunes 2026-11-02). Se entregan el enlace al
+repositorio y el PDF del informe. `entrega.json`: grupo `ADAG1`, semana `6`, confirmada.
 
 ### Hecho y verificado
 
 | Tarea | Estado | Evidencia |
 |---|---|---|
 | Archivos base | Listo | Idénticos a `4d8358d` |
-| S2 a S4: contratos, `OraculoContado`, sintético, fuerza bruta | Listo | 60 pruebas pasan con `uv run pytest` |
+| Código y pruebas | Listo | 174 pruebas pasan (`.venv/Scripts/python.exe -m pytest`; en la máquina de Sebastián `uv run` falla con "uv trampoline failed to canonicalize script path") |
 | S5: velocidad en Colab | Listo | `resultados/velocidad.json`: 1,99 s por generación, 5,77 GB |
-| S7 y S8: reducción y muestreo | Redactado | `informe/secciones/02_reduccion.tex`; compila |
-| S9 y S10: notebook de evaluación | Probado en Colab con datos de prueba | T4 y modelo real, con `entrega.json` temporal y 8 instancias de búsqueda: corrieron todas las celdas y el selector de archivos. Sin `entrega.json` definitivo ni datos privados reales |
-| S6: revisión de coordenadas | Listo | PR #2 integrado en `main` |
-| S12: README | Listo | El ejemplo da el resultado esperado |
-| D5: búsqueda real | Listo | Dos arranques convergidos; unión de 117 configuraciones y 11 700 generaciones de B = 14 400 (`resultados/busqueda/`, `resumir.py`) |
-| D6: análisis de fallos | Redactado | `resultados/busqueda/analisis_busqueda.md`, sección 6, con los 40 textos de `CATALOGO` en `catalogo_opciones.txt`; los vínculos opción-fallo siguen como hipótesis |
-| D7: `notebooks/busqueda.ipynb` | Probado en Colab | Selector único (PR #6), parada y validación (PR #8) y registro B6 (PR #10) integrados. Celda de parámetros ejecutada con `ARRANQUE = 0` y `1` (imprime `pasadas: 3` y el historial de cada arranque). Celdas de instalación, carga del modelo y validación ejecutadas con GPU el 2026-11-01. B6 se probó en local, no en Colab |
-| D9: validación final | Ejecutada una vez | 18,4 % sobre 87 instancias; copia con salidas en `resultados/validacion/`, registro del 2026-11-01, 21:07 en la bitácora. Falta `entrega.json` |
-| D8: configuración congelada | Listo | Registro del 2026-11-01, 18:30 en `docs/bitacora/2026-10.md`, con huellas de los archivos fuente. La etiqueta `config-congelada` (`6e5d003`) está en el remoto desde el 2026-11-01 y Sebastián está avisado |
+| Búsqueda real (D5 a D9) | Listo | Dos arranques; unión de 117 configuraciones y 11 700 generaciones de B = 14 400; validación una sola vez: 18,4 % sobre 87 |
+| Configuración congelada | Listo | rol 1, estrategia 1, formato 3, estilo 3, cierre 3, temperatura 0.0; etiqueta `config-congelada` (`6e5d003`) |
+| `entrega.json` | Listo | En `main`; pasa `cargar_entrega` |
+| `notebooks/busqueda.ipynb` | Listo | Probado en Colab; guarda la salida real de B6 y el resultado de la validación, que remite a `resultados/validacion/` |
+| `notebooks/evaluacion.ipynb` | Probado con datos de prueba | Falta la prueba S14 con `main` final |
+| Exacto (B5) | Listo con el sintético | `backtracking.py` con cota D5 y cota estructural; barridos en `resultados/exacto/`; sección 03. Con el modelo real no se ejecutó |
+| Informe | Compila sin advertencias | Secciones 01 a 07, ficha de identificación y anexo de decisiones; 18 páginas |
+| Manual técnico | Listo | `docs/manual_tecnico.md`, enlazado desde el README |
 
-**Configuración congelada (tarea D8, domingo 2026-11-01, 18:30):** rol 1, estrategia 1,
-formato 3, estilo 3, cierre 3, temperatura 0.0; 20 % en las 100 instancias de búsqueda. Es la
-mejor encontrada del arranque 0, que paró por convergencia en su pasada 3. No cambia salvo
-evidencia nueva y acuerdo del equipo. Registro y huellas: `docs/bitacora/2026-10.md`. No es un
-óptimo global ni del subcatálogo, y no se confunde con la decisión D8 de la sección 5.
+Los cambios del 2026-11-05 sobre partes de Dylber (secciones 01 y 04, manual y notebook de
+búsqueda) están en commits separados; Dylber los revisa después de la entrega. Detalle en la
+bitácora, registro del 2026-11-05.
 
-### Pendiente de Sebastián
+### Pendiente antes de entregar (Sebastián)
 
-1. Lunes: S11 conectar el `entrega.json` definitivo, S13 integrar `informe/main.tex` antes de
-   las 16:00 y S14 probar desde un clon limpio.
-2. Secciones 03, 05 y 07 redactadas en `docs/informe-integracion`, y citas contrastadas con
-   fuentes externas. Falta revisarlas; la 05 es de Dylber y debe aceptarla.
+1. Push de `docs/cierre-entrega`, PR e integración en `main`.
+2. S14: clon limpio en Colab sobre `main` final; correr el ejemplo y `notebooks/evaluacion.ipynb`.
+3. Versionar el PDF en el último commit y crear la etiqueta `primera-entrega`; push de la etiqueta.
+4. Entregar el enlace y el PDF.
 
-### Pendiente de Dylber
+### Pendiente después de la entrega
 
-1. D6: las pruebas con el caché ya se hicieron (sección 6.3 de `analisis_busqueda.md`).
-   La prueba de copia sin añadidos también se hizo (1 de 11 aciertan). Queda opcional
-   mirar, en el caché de la cuenta original, si los 32 casos de la frase de `estrategia 7`
-   se concentran en instancias de copia.
-2. D9: la validación ya se ejecutó (domingo 2026-11-01, 9:07 pm): 18,4 % sobre 87
-   instancias; no se repite. Falta `entrega.json`, con grupo y semana reales.
-3. Lunes, D10 y D11: secciones 04 y 06 del informe y `docs/manual_tecnico.md`
-   (la bitácora menciona un borrador, pero no está en ninguna rama remota). Al redactar, declarar que:
-   - el arranque 1 no es independiente: usó exclusiones derivadas del arranque 0 y su
-     columna `arranque` dice `0`;
-   - su 17 % no es un óptimo local completo: 15 de 35 vecinos quedaron sin evaluar. Los 35 de la
-     ganadora sí se evaluaron;
-   - la premisa de esas exclusiones sobre `estrategia 3` resultó falsa: llegó a 15 %.
-4. Lunes, D12: revisar la reducción con Sebastián.
-
-**Plan de contingencia:** si el sábado por la noche no hay fecha clara para el primer arranque,
-o el domingo al mediodía no hay una pasada real en curso, Sebastián toma coordenadas y la búsqueda.
-Sin búsqueda real no hay entrega.
+- Dylber: revisar los commits de `docs/cierre-entrega` y aceptar la sección 05.
+- D12: revisar la reducción entre los dos.
+- Decidir D18 (`MAX_PASADAS = 3`); el informe la reporta como propuesta.
+- Siguiente etapa: reparto uniforme frente a UCB1 y, si hay GPU, el exacto en un subcatálogo (D8).
 
 ### Riesgos abiertos
 
-- Colab puede cortar la sesión: 14 400 generaciones son unas 8 h, hasta 10 h con margen. Dividir
-  entre las dos cuentas con el mismo caché en Drive.
 - Datos privados: si traen familias que no estén en IFEvalG, `oraculo.py` lanza `KeyError` y el
   notebook de evaluación no carga verificadores extra. No se ha podido confirmar.
-- `notebooks/evaluacion.ipynb` clona `main`: `entrega.json` debe estar en `main` antes de la prueba final.
+- `notebooks/evaluacion.ipynb` clona `main`: todo debe estar en `main` antes de S14.
 - La velocidad sale de una sola configuración; otras pueden tardar más.
 
 ### Pendientes del equipo
 
-- Grupo de `entrega.json`: `"ADAG1"`, confirmado por Dylber el 2026-11-02. Falta confirmar la
-  semana (hoy `6`, provisional).
-- Confirmar si "medianoche" es el final del lunes y cómo se entrega: enlace al repositorio, PDF o ambos.
 - Fechas de las demás etapas del cronograma.
 - Política de declaración de herramientas de apoyo: por definir.
-- Propuesta D18 (por aprobar): `MAX_PASADAS = 3` para los dos arranques. D17 decía "hasta 2
-  pasadas"; el arranque 0 usó una tercera como verificación y quedó dentro de B.
 
 ---
 
