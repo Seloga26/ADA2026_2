@@ -134,6 +134,7 @@ Se tomaron sin posibilidad de nueva consulta a la docente.
 | **D15** | La NP-dureza cubre solo la parte 1, configuración óptima con oráculo exacto. La parte 2, consultas ruidosas o limitadas, se analiza por complejidad de muestreo. | La guía prohíbe trasladar la demostración sin justificarla. |
 | **D16** | Rutas: `entrega.json` en la raíz, `notebooks/busqueda.ipynb`, `notebooks/evaluacion.ipynb` y `docs/manual_tecnico.md`. La configuración debe ser la misma en los tres primeros. | La guía exige coherencia entre ellos. |
 | **D17** | Búsqueda real: `B = 14 400` generaciones, con dos arranques de hasta 2 pasadas cada uno. Un tercer arranque solo si sobra GPU antes del congelamiento. | Medido: 1,99 s por generación en T4, unas 4 h por arranque. El subcatálogo no entra en esta entrega. |
+| **D18** | Tope de 3 pasadas por arranque (`MAX_PASADAS = 3`) en los dos arranques. Aprobada el 2026-11-05, después de ejecutarlos. | El arranque 0 usó una tercera pasada como verificación y quedó dentro de B; D17 decía hasta 2. No cambió ninguna corrida. |
 
 ---
 
@@ -229,7 +230,6 @@ bitácora, registro del 2026-11-05.
 
 - Dylber: revisar los commits de `docs/cierre-entrega` y aceptar la sección 05.
 - D12: revisar la reducción entre los dos.
-- Decidir D18 (`MAX_PASADAS = 3`); el informe la reporta como propuesta.
 - Siguiente etapa: reparto uniforme frente a UCB1 y, si hay GPU, el exacto en un subcatálogo (D8).
 
 ### Riesgos abiertos

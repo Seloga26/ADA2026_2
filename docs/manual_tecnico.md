@@ -5,7 +5,7 @@
 > sea óptima.
 
 Materia: Análisis y Diseño de Algoritmos, 2026-2. Grupo `ADAG1`. Integrantes: Sebastián
-López y Dylber Cabrera. Las decisiones citadas (D1 a D17, y la propuesta D18) están en
+López y Dylber Cabrera. Las decisiones citadas (D1 a D18) están en
 `AGENTS.md`, sección 5. El análisis teórico (formalización, reducción, costo y cotas) está
 en el informe, `informe/main.tex`.
 
@@ -246,8 +246,8 @@ todo" no hace nada; D12 permite una sola validación.
 4 h por arranque (de una sola configuración; otras pueden tardar más). El subcatálogo (D8)
 no entra en esta entrega.
 
-D17 decía hasta 2 pasadas por arranque; el notebook usa `MAX_PASADAS = 3` (**propuesta
-D18, pendiente de aprobación del equipo**), porque el arranque 0 usó una tercera como
+D17 decía hasta 2 pasadas por arranque; el notebook usa `MAX_PASADAS = 3` (D18, aprobada
+el 2026-11-05, después de ejecutar los arranques), porque el arranque 0 usó una tercera como
 verificación y quedó dentro de B.
 
 Para reproducir cada arranque: en B1 poner `ARRANQUE = 0` o `1` y ejecutar B4. El

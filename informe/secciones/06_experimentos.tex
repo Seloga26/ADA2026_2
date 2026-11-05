@@ -23,7 +23,7 @@ Modelo, temperatura, semilla & \texttt{qwen17b}, $0{,}0$, semilla $1$ (D2) \\
 Espacio & 5 ranuras de 8 opciones, $|\conf|=32\,768$ \\
 Lote de búsqueda & 100 instancias de \texttt{datos\_visibles.json} \\
 Presupuesto & $B=14\,400$ generaciones nuevas (D11, D17) \\
-Tope de pasadas & $P=3$ en los dos arranques (propuesta D18, pendiente de aprobación) \\
+Tope de pasadas & $P=3$ en los dos arranques (D18) \\
 Orden de ranuras & Arranque 0: rol, estrategia, formato, estilo, cierre. Arranque 1: formato, rol, estilo, estrategia, cierre \\
 Criterio de aceptación & Mejora estricta de la precisión; en empate se conserva la actual \\
 Caché & Se guarda en Drive; no se cobra una (configuración, instancia, semilla) ya generada \\
@@ -32,8 +32,9 @@ Caché & Se guarda en Drive; no se cobra una (configuración, instancia, semilla
 \end{center}
 
 La decisión D17 fijaba hasta dos pasadas por arranque. El arranque 0 usó una tercera como
-verificación y quedó dentro de $B$; por eso el tope se propone en tres. La propuesta aún no
-la aprobó el equipo.
+verificación y quedó dentro de $B$; por eso el tope quedó en tres (D18). La decisión se
+aprobó el 5 de noviembre de 2026, después de ejecutar los arranques, así que regulariza lo
+que se hizo; no cambió ninguna corrida.
 
 \paragraph{Condición de parada} (celda B4). Un arranque termina por la primera de estas
 causas: una pasada completa sin cambios aceptados (convergencia, óptimo local por ranura,
