@@ -12,17 +12,21 @@ sección~\ref{sec:reduccion}; aquí solo se fija el problema que ambas estudian.
 \begin{definicion}[Espacio de configuraciones]
 Hay $L$ categorías y la categoría $i$ ofrece $k_i$ opciones. Una configuración elige una
 opción por categoría. El conjunto de configuraciones es $\conf$ y
-$|\conf|=\prod_{i=1}^{L}k_i$. Un lote $I$ de $n=|I|$ instancias fija las pruebas: cada
-instancia exige un conjunto de restricciones sobre la respuesta del modelo. Una
-configuración \emph{cumple} una instancia si la respuesta generada con ella cumple todas
-sus restricciones; si falta alguna, no la cumple (puntaje todo-o-nada). Con eso,
-$\Acc(c)$ es la fracción de instancias de $I$ que $c$ cumple por completo.
+$|\conf|=\prod_{i=1}^{L}k_i$. La temperatura de generación también forma parte de la
+configuración; en este proyecto se fija en $0{,}0$, de modo que no multiplica el espacio
+(con las tres temperaturas disponibles serían $3\cdot 32\,768=98\,304$ configuraciones).
+Un lote $I$ de $n=|I|$ instancias fija las pruebas: cada instancia exige un conjunto de
+restricciones sobre la respuesta. Una configuración \emph{cumple} una instancia si
+satisface todas sus restricciones; si falta alguna, no la cumple (puntaje todo-o-nada).
+Con eso, $\Acc(c)$ es la fracción de instancias de $I$ que $c$ cumple por completo.
 \end{definicion}
 
 Además, $B$ es el presupuesto de generaciones y $m_j$ las consultas gastadas en la
-configuración $c_j$. Esta definición de cumplir una instancia no usa el modelo de reglas
-de la sección~\ref{sec:reduccion} y es coherente con CONFIG-EXACTA: allí una instancia
-se cumple cuando se satisfacen todas las reglas que exige.
+configuración $c_j$. Las dos partes difieren en quién decide si una configuración cumple
+una instancia. En la parte 1 lo decide un modelo de reglas explícito, que forma parte de
+la entrada y es el mismo de CONFIG-EXACTA (sección~\ref{sec:reduccion}). En la parte 2 lo
+decide la respuesta que genera el modelo de lenguaje, revisada por los verificadores del
+oráculo.
 
 \subsection{Parte 1: configuración óptima con oráculo exacto}
 
@@ -30,8 +34,12 @@ se cumple cuando se satisfacen todas las reglas que exige.
 límite de consultas. Es una abstracción para estudiar la dureza del problema; el problema
 real de esta entrega es la parte 2.
 
-\paragraph{Entrada y tamaño.} La entrada es $(L,k_1,\dots,k_L,I)$. Su tamaño no se reduce
-a una sola variable: depende de $L$, de los $k_i$ y de $n$. Como en la
+\paragraph{Entrada y tamaño.} La entrada es $(L,k_1,\dots,k_L,R,\sigma,I)$: el catálogo,
+un conjunto $R$ de reglas, la función $\sigma$ que indica qué reglas de $R$ satisface cada
+opción y el lote $I$, donde cada instancia exige un subconjunto de $R$. Una configuración
+cumple una instancia si la unión de las reglas de sus opciones contiene todas las reglas
+exigidas. Su tamaño no se reduce a una sola variable: depende de $L$, de los $k_i$, de
+$|R|$ y de $n$. Como en la
 sección~\ref{sec:reduccion}, $L$ y los $k_i$ forman parte de la entrada, de modo que
 $|\conf|$ puede crecer de forma exponencial en $L$. El proyecto es el caso $L=5$ y $k_i=8$,
 donde $|\conf|=8^5=32\,768$ es una constante: con $L$ fijo el espacio no crece, aunque
@@ -42,8 +50,11 @@ siga siendo grande para recorrerlo con un modelo real.
 \paragraph{Objetivo y restricciones.} Maximizar $\Acc(c)$ sobre $c\in\conf$. No hay
 presupuesto de consultas.
 
-\paragraph{Supuestos y alcance.} El oráculo calcula $\Acc(c)$ en tiempo polinomial, como en
-CONFIG-EXACTA. Esta parte solo sirve para el análisis de dureza.
+\paragraph{Supuestos y alcance.} Con $\sigma$ en la entrada, el oráculo exacto calcula
+$\Acc(c)$ en tiempo polinomial. Su versión de decisión, con un umbral $t$, es
+CONFIG-EXACTA, cuya NP-completitud se demuestra en la sección~\ref{sec:reduccion}. Esta
+parte solo sirve para el análisis de dureza: el modelo de lenguaje real no se describe con
+un $\sigma$ conocido.
 
 \subsection{Parte 2: búsqueda con consultas limitadas o ruidosas}
 
@@ -58,12 +69,19 @@ análisis de la sección~\ref{sec:reduccion}.
 $I$, el presupuesto $B$ y la semilla. El tamaño vuelve a depender de $L$, de los $k_i$ y de $n$.
 
 \paragraph{Contabilidad de $B$.} $B$ cuenta las generaciones nuevas por (configuración,
-instancia, semilla) (D11). Una pareja ya generada y guardada en el caché no se cobra.
+instancia, semilla) (D11). Una terna ya generada y guardada en el caché no se cobra.
 
 \paragraph{Salida.} Las consultas $m_j$ por configuración $c_j$ y una configuración
 ganadora $c^*$.
 
-\paragraph{Objetivo y restricciones.} Maximizar $\Acc(c^*)$ sujeto a $\sum_j m_j\le B$.
+\paragraph{Objetivo y restricciones.} Maximizar $\Acc(c^*)$ sujeto a $\sum_j m_j\le B$,
+con $m_j$ entero y $0\le m_j\le n$: como el caché no cobra lo ya generado, una
+configuración no consume más de $n$ generaciones nuevas sobre el lote. Cuando $m_j<n$,
+$\Acc(c_j)$ no se observa; solo se conoce la estimación $\widehat{\Acc}_{m_j}(c_j)$, la
+fracción de aciertos en las $m_j$ instancias medidas. Por eso $c^*$ se elige con las
+estimaciones disponibles y la calidad de la elección depende de cuántas consultas se
+gastaron en cada configuración; este es el problema que la sección~\ref{sec:reduccion}
+analiza por complejidad de muestreo.
 
 \paragraph{Supuestos y alcance.} $c^*$ es la mejor configuración encontrada, no un óptimo
 demostrado: el algoritmo no recorre $\conf$ ni garantiza haberlo hecho. Lo que $\Acc(c^*)$
