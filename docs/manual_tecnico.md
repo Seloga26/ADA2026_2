@@ -64,7 +64,10 @@ busqueda_prompt/
   ejemplo.py          ejemplo pequeño
   algoritmos/
     fuerza_bruta.py   referencia exacta para espacios pequeños
+    backtracking.py   exacto con cota D5 y cota estructural opcional
     coordenadas.py    búsqueda por coordenadas (aproximado)
+  experimentos/
+    medir.py          barridos del exacto con el oráculo sintético
 notebooks/            medicion_velocidad, busqueda, evaluacion
 resultados/           busqueda/ (historiales y análisis), validacion/, velocidad.json
 tests/                pruebas automáticas
@@ -78,7 +81,7 @@ Los módulos propios no importan `oraculo.py`; los notebooks de Colab sí lo usa
 - `RANURAS`, `OPCIONES_POR_RANURA = 8`, `TEMPERATURAS = (0.0, 0.3, 0.7)`.
 - `Config` es un diccionario con una opción por ranura más `temperatura`.
 - `Oraculo.evaluar(config, instancias, semilla) -> Resultado`, con `precision`, `trazas` y `n`.
-- `ResultadoBusqueda`: `ganadora`, `precision`, `consultas` y `asignacion` (consultas por config).
+- `ResultadoBusqueda`: `ganadora`, `precision`, `consultas`, `asignacion` (consultas por config) y `estadisticas` (contadores propios de cada algoritmo, como nodos y podas).
 - `clave_config`: texto estable de una config, independiente del orden de las llaves.
 - `PresupuestoAgotado`: se lanza cuando un lote superaría B.
 
@@ -104,7 +107,35 @@ Evalúa todas las configuraciones recibidas y devuelve la primera de mayor preci
 Peor caso O(|C|·n) generaciones. Con el modelo real no se ejecuta completa (3 276 800
 generaciones, D7).
 
-### 3.5 Búsqueda por coordenadas (`algoritmos/coordenadas.py`)
+### 3.5 Backtracking (`algoritmos/backtracking.py`)
+
+`resolver(oraculo, ranuras, opciones, instancias, semilla=1, presupuesto=None,
+cota_parcial=None)` recorre el árbol de configuraciones, una ranura por nivel, en el mismo
+orden que la fuerza bruta. En cada hoja evalúa instancia por instancia y abandona la
+configuración cuando sus aciertos más las instancias restantes no superan a la mejor
+conocida (cota D5, vale con cualquier oráculo). Devuelve la misma ganadora que la fuerza
+bruta. Peor caso |C|·n generaciones (oráculo sin aciertos); mejor caso n.
+
+`cota_parcial` poda subárboles enteros. `sintetico.cota_estructural(oraculo, ranuras,
+opciones, instancias)` construye una cota válida para el oráculo sintético sin ruido; con
+ruido lanza `ValueError`. Con el modelo real no se usa (D6).
+
+`estadisticas` del resultado trae `nodos`, `hojas`, `abandonos` (cota D5) y
+`podas_parciales` (cota estructural).
+
+Barridos (D7, D10), unos 10 s en local:
+
+```
+uv run python -m busqueda_prompt.experimentos.medir
+```
+
+Escribe `resultados/exacto/barrido_n.csv` (|C| = 256, n de 10 a 100),
+`barrido_c.csv` (n = 50, |C| = 2^L con L de 4 a 10) y `ajuste.json` (pendientes
+log-log). Las gráficas del informe (sección 3) las dibuja LaTeX con pgfplots a partir de
+esos CSV, sin matplotlib. Pendientes obtenidas: fuerza bruta 1,00 en los dos ejes; cota D5
+1,03 frente a n y 0,52 frente a |C|.
+
+### 3.6 Búsqueda por coordenadas (`algoritmos/coordenadas.py`)
 
 Cada arranque parte de una config al azar (generador con semilla `semilla_busqueda|a`,
 reproducible; las opciones excluidas nunca salen como punto de partida). En una pasada
@@ -294,8 +325,8 @@ fecha exacta de la ejecución no quedó registrada.
 
 ## 7. Validación
 
-- Las pruebas automáticas están en `tests/`. Con `uv run pytest` pasan **86 pruebas**
-  (comprobado el 2026-11-02). En Windows puede fallar el directorio temporal de pytest con
+- Las pruebas automáticas están en `tests/`. Con `uv run pytest` pasan **174 pruebas**
+  (comprobado el 2026-11-05). En Windows puede fallar el directorio temporal de pytest con
   `PermissionError`; se resuelve con `uv run pytest --basetemp=<carpeta propia>`.
 - La validación con `oraculo.validar` (87 instancias) ya se usó **una sola vez**, sobre la
   configuración ya elegida (D12). Si se eligiera con validación, dejaría de ser prueba.
@@ -313,8 +344,9 @@ fecha exacta de la ejecución no quedó registrada.
 
 - **No se afirma óptimo global ni del subcatálogo.** La configuración es la mejor
   encontrada (D8, D17).
-- **Fuera de esta entrega:** backtracking con cota, reparto uniforme frente a UCB1,
-  barridos y gráficas de T(n), y el exacto sobre un subcatálogo. Successive Halving se
+- **El exacto solo se midió con el modelo sintético.** Con el modelo real no se ejecutó.
+- **Fuera de esta entrega:** reparto uniforme frente a UCB1 y el exacto sobre un
+  subcatálogo con el modelo real. Successive Halving se
   descarta con justificación (D4).
 - **Óptimos locales:** la búsqueda por coordenadas puede quedar en un óptimo local; con
   dos arranques solo se muestrea ese riesgo. Los dos arranques pararon por convergencia
