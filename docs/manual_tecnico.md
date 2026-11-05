@@ -25,10 +25,9 @@ Salida del proyecto: una configuración y el historial de cómo se halló. El ar
 
 | Pieza | Detalle |
 |---|---|
-| Local | Python 3.12 con `uv`, `pytest` y `matplotlib`. Sin GPU. |
+| Local | Python 3.12 con `uv`, `pytest` y `matplotlib`. Sin GPU. Solo se usan el oráculo sintético y las pruebas. |
 | Colab | GPU T4, modelo `qwen17b`. |
 | Restricción | `oraculo.py` importa `torch` y verificadores de `/content/open-instruct`; **no corre en local**. |
-| Local | Solo se usa el oráculo sintético y las pruebas. |
 
 Instalación y pruebas locales:
 
@@ -145,8 +144,13 @@ para por convergencia, la config es un óptimo local por ranura (si el oráculo 
 determinista). **No hay razón de aproximación**: un contraejemplo construido lo
 muestra, y el riesgo de óptimos locales se mide con varios arranques.
 
-El conteo de B usa un único `OraculoContado` para todos los arranques: una
-(config, instancia, semilla) repetida entre arranques **no se cobra dos veces**.
+Dentro de una llamada a `resolver`, el conteo de B usa un único `OraculoContado` para
+todos sus arranques: una (config, instancia, semilla) repetida entre ellos **no se cobra
+dos veces**. Ese registro vive en la memoria del proceso. En la búsqueda real cada
+arranque corrió en una sesión de Colab distinta, cada una con su propio contador, y al
+reanudar una sesión el contador vuelve a cero. Por eso el código no impuso B sobre los
+dos arranques juntos: el total de la unión frente a B = 14 400 se comprobó después con
+`resumir.py` (sección 6).
 
 ## 4. Historial de la búsqueda (CSV)
 
@@ -158,9 +162,10 @@ sincroniza y, si Colab se corta, el historial ya quedó guardado. Columnas, en o
 
 Particularidades comprobadas en los archivos reales (`resultados/busqueda/`):
 
-- Una reanudación **agrega otra ejecución** al mismo CSV; cada ejecución empieza con una
-  fila de paso 1. `historial_arranque_1.csv` trae tres ejecuciones; las dos primeras son
-  prefijos de la tercera.
+- Una reanudación sin borrar el CSV **agrega otra ejecución** al mismo archivo; cada
+  ejecución empieza con una fila de paso 1. `historial_arranque_1.csv` trae tres
+  ejecuciones, de antes de que el notebook pidiera borrar el CSV al reanudar (sección 5.1);
+  las dos primeras son prefijos de la tercera.
 - La columna `arranque` es el índice interno de la ejecución, no el número de arranque.
 - La pasada no es una columna: `resumir.py` la infiere.
 
@@ -246,8 +251,8 @@ Contenido actual:
  "config": {"rol": 1, "estrategia": 1, "formato": 3, "estilo": 3, "cierre": 3, "temperatura": 0.0}}
 ```
 
-El grupo `ADAG1` lo confirmó Dylber el 2026-11-02. La semana `6` es **provisional**:
-`PENDIENTE` de confirmar (la guía no dice qué semana corresponde a esta entrega).
+El grupo `ADAG1` lo confirmó Dylber el 2026-11-02. La semana `6` es la semana del curso
+en que se entrega, según confirmó Sebastián el 2026-11-05.
 
 ## 6. Resultados de la búsqueda
 
@@ -329,5 +334,6 @@ fecha exacta de la ejecución no quedó registrada.
 ## 9. Mantenimiento de este manual
 
 Sebastián revisa los módulos que documenta (secciones 3.2 a 3.4); Dylber integra.
-`PENDIENTE`: Sebastián debe leer las secciones 3.2 a 3.4 y confirmar que coinciden con
-su código.
+El 2026-11-05 Sebastián comprobó que las secciones 3.2 a 3.4 coinciden con `contado.py`,
+`fuerza_bruta.py` y `sintetico.py`, y que el ejemplo y `resumir.py` dan la salida
+documentada.
