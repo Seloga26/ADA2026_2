@@ -47,6 +47,7 @@ reinicia; después, ejecútelas otra vez.
 | Notebook | Uso |
 |---|---|
 | `notebooks/medicion_velocidad.ipynb` | Mide cuánto tarda una generación del modelo real |
+| `notebooks/busqueda.ipynb` | Búsqueda real por coordenadas, registro, análisis de fallos y validación |
 | `notebooks/evaluacion.ipynb` | Evalúa la configuración de `entrega.json` sobre datos de prueba |
 
 ## Estructura
