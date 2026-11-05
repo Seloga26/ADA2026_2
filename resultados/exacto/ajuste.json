@@ -1,0 +1,27 @@
+{
+ "semillas": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "parametros": {
+  "reglas": 12,
+  "reglas_por_instancia": 3,
+  "densidad": 0.2,
+  "conflictos": 3
+ },
+ "frente_a_n": {
+  "fuerza_bruta": 1.0,
+  "backtracking": 1.027,
+  "backtracking_estructural": 1.189,
+  "peor": 1.0
+ },
+ "frente_a_C": {
+  "fuerza_bruta": 1.0,
+  "backtracking": 0.523,
+  "backtracking_estructural": 0.28,
+  "peor": 1.0
+ }
+}
