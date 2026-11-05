@@ -57,6 +57,34 @@ class OraculoSintetico:
         return Resultado(aciertos / len(instancias), trazas, len(instancias))
 
 
+def cota_estructural(oraculo, ranuras, opciones, instancias):
+    """Cota por estructura de reglas para el backtracking; solo en el modelo sintético (D6).
+
+    Para una asignación parcial, las reglas alcanzables son las de las opciones elegidas
+    más todas las de las ranuras libres. Una instancia que exige una regla fuera de ese
+    conjunto no la cumple ninguna configuración que complete la parcial, y los conflictos
+    solo quitan reglas, así que contar las demás da una cota superior de los aciertos.
+    Con ruido la cota dejaría de valer, por eso se rechaza.
+    """
+    if oraculo.ruido > 0.0:
+        raise ValueError("la cota estructural no vale con ruido")
+    libres_por_nivel = []
+    for nivel in range(len(ranuras) + 1):
+        alcanzables = set()
+        for r, k in zip(ranuras[nivel:], opciones[nivel:]):
+            for o in range(k):
+                alcanzables |= oraculo.reglas_por_opcion.get((r, o), frozenset())
+        libres_por_nivel.append(frozenset(alcanzables))
+
+    def cota(parcial):
+        alcanzables = set(libres_por_nivel[len(parcial)])
+        for opcion in parcial.items():
+            alcanzables |= oraculo.reglas_por_opcion.get(opcion, frozenset())
+        return sum(1 for x in instancias if x["reglas"] <= alcanzables)
+
+    return cota
+
+
 def generar(opciones, n, reglas, semilla, reglas_por_instancia=2, densidad=0.3,
             conflictos=0, ruido=0.0):
     """Crea (ranuras, oráculo, instancias) reproducibles para una semilla."""

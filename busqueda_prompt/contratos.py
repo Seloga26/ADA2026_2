@@ -31,12 +31,16 @@ class Resultado:
 
 @dataclass
 class ResultadoBusqueda:
-    """Salida común de los algoritmos: ganadora, precisión y consultas m_j."""
+    """Salida común de los algoritmos: ganadora, precisión y consultas m_j.
+
+    `estadisticas` guarda contadores propios de cada algoritmo (nodos, podas).
+    """
 
     ganadora: Config
     precision: float
     consultas: int
     asignacion: dict = field(default_factory=dict)
+    estadisticas: dict = field(default_factory=dict)
 
 
 class Oraculo(Protocol):
