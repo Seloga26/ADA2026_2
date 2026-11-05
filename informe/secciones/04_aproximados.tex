@@ -45,8 +45,10 @@ comparación $o\neq c_i$ usa la opción \emph{actual} en ese momento: tras acept
 dentro de una ranura, la opción anterior vuelve a probarse más adelante en esa misma
 ranura (sale del caché, sin generaciones nuevas). Y si el presupuesto $B$ se agota, el
 algoritmo devuelve la mejor configuración vista hasta ahí, que es la actual por el
-lema~\ref{lem:monotonia}. Varios arranques son repeticiones independientes del algoritmo
-desde puntos de partida distintos; se devuelve la mejor de las configuraciones finales.
+lema~\ref{lem:monotonia}. Varios arranques repiten el algoritmo desde puntos de partida
+distintos y se devuelve la mejor de las configuraciones finales. Entre un arranque y otro
+pueden cambiar $\pi$ y los $O_i$; en ese caso los arranques no son independientes, como
+ocurrió en este proyecto (sección~\ref{sec:experimentos}).
 
 \subsection{Propiedades}
 
@@ -107,8 +109,8 @@ configuraciones es a lo sumo $1+p\sum_i|O_i|$, y las generaciones, a lo sumo
 En una pasada, el recorrido de la ranura $i$ examina cada opción de $O_i$ una vez, y
 evalúa todas menos la actual, así que hace a lo sumo $|O_i|$ evaluaciones. Sumar sobre las
 ranuras da $\sum_i|O_i|$ por pasada, más la evaluación inicial. Cada evaluación son $n$
-generaciones. El caché solo puede bajar la cifra, porque no cobra una pareja
-(configuración, instancia) ya generada.
+generaciones. El caché solo puede bajar la cifra, porque no cobra una terna
+(configuración, instancia, semilla) ya generada.
 \end{proof}
 
 Con $P$ constante, el costo es lineal en $n$. Sin tope, el lema~\ref{lem:terminacion} da
@@ -127,9 +129,11 @@ Presupuesto $B$ (D17) & $14\,400$ \\
 \bottomrule
 \end{tabular}
 \end{center}
-Dos arranques de $P=3$ podrían sumar, en el peor caso, más que $B$. Lo que acota el gasto
-real es el contador de generaciones, que lanza \texttt{PresupuestoAgotado} al llegar a $B$.
-Lo observado fue menor y está en la sección~\ref{sec:experimentos}: el arranque 0 evaluó
+Dos arranques de $P=3$ podrían sumar, en el peor caso, más que $B$. Dentro de una
+ejecución, lo que acota el gasto es el contador de generaciones, que lanza
+\texttt{PresupuestoAgotado} antes de pasar de $B$. Los dos arranques reales corrieron en
+sesiones distintas, cada una con su propio contador, así que el total conjunto frente a $B$
+se comprobó después, sobre la unión de los historiales. Lo observado fue menor y está en la sección~\ref{sec:experimentos}: el arranque 0 evaluó
 $92$ configuraciones distintas ($9\,200$ generaciones) y el arranque 1, $28$ ($2\,800$).
 
 \subsection{Cota de calidad: no hay razón de aproximación}
