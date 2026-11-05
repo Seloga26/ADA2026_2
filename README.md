@@ -6,6 +6,9 @@ que maximice la precisión de un modelo de lenguaje, controlando el número de c
 **Integrantes:** Sebastián López y Dylber Cabrera.
 **Versión:** solución base de la primera entrega, en desarrollo.
 
+El entorno, la arquitectura, el uso y los límites de la solución están en el
+[manual técnico](docs/manual_tecnico.md).
+
 ## Requisitos
 
 - Python 3.12 y [`uv`](https://docs.astral.sh/uv/).
